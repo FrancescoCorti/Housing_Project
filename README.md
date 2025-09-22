@@ -38,7 +38,7 @@ To determine buying/leasing intervals, Student statistical function for probabil
 3. For a complete description of the data and of procedures used to collect data and to define zones, always refer to ["Manuale dell'Osservatorio del Mercato Immobiliare"](https://www.agenziaentrate.gov.it/portale/documents/20143/265514/Manuale_OMI_2025_03_20.pdf/6ae6f18b-1632-a588-7990-bc94969f354a?t=1742814198800).
 
 
-## Description of variables in the translated and merged dataset (*translation (original name)*)
+## Description of variables in the source datasets (*translation (original name)*)
 
 -*area (Area_territoriale)*: macro areas for the listing (*NW (north-west)*, *NE (north-east)*, *C (center)*, *I (islands)*, *S (south)*);
 
