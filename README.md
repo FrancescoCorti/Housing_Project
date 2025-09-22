@@ -58,6 +58,8 @@ To determine buying/leasing intervals, Student statistical function for probabil
 
 -*zone (Zona)*: subdivision of sectors on OMI's socio-economic paramenters (for instance, a semi-central area can be devided in C1, C2, etc.);
 
+-*zone_link (LinkZona)*;
+
 -*type (Descr_Tipologia)*: building type of the listing;
 
 -*condition (Stato)*: general maintenance state of the listing (*normal*, *excellent*, *poor*);
