@@ -4,11 +4,11 @@
 # Housing-Project
 
 ## Agenzia delle Entrate - OMI
-*Agenzia delle Entrate* is the Italian governmental agency responsible for managing taxation. *Osservatorio del Mercato Immobiliare* (Observatory for Real Estate Market) was created in 1999 as a branch of *Agenzia delle Entrate*. Its main goal is to provide transparent public information about the real estate market and support the Agency’s estimation activities.\
+*Agenzia delle Entrate* is the Italian governmental agency responsible for managing taxation. *Osservatorio del Mercato Immobiliare* (Observatory for Real Estate Market, OMI) was created in 1999 as a branch of *Agenzia delle Entrate*. Its main goal is to provide transparent public information about the real estate market and support the Agency’s estimation activities.\
 This project is based on a dataset created by the author, which merges OMI's semi-annual estimates of the real estate market.
 
 **OMI's estimations**\
-OMI’s estimate is not to be considered a precise estimate of the market value of a property, but an estimate interval that most probably bounds the real market value. Each estimate is not referred to a precise building/housing unit, but to a group of properties that share the following features:
+OMI’s estimate is not to be considered a precise estimate of the market value of a property, but an estimate interval that most probably bounds the real market value. Each estimate is not referred to a precise property, but to a group of them that share the following features:
 
 -*municipality (comune)*: the minimal territorial administration unit in Italy; 
 
@@ -24,26 +24,27 @@ OMI’s estimate is not to be considered a precise estimate of the market value 
 
 Zones are defined by considering various socio-economic factors, such as the attractiveness of the municipality, public transportation, parking availability, prevalent building types, and homogeneity of building structures, among others. Then, depending on the real estate market volume in a specific area, properties are sampled:
 
--in areas with market dynamics, properties are sampled from different sources, such as sale deeds, lease contracts, real estate agencies, online real estate listings, building companies, and so on;
+-in areas with enough market dynamics, properties are sampled from different sources, such as sale deeds, lease contracts, real estate agencies, online real estate listings, building companies, and so on;
 
 -in areas with limited market dynamics, properties are sampled from multiple similar zones, and their prices are aligned on spatial/temporal price trends based on territorial clusters.
 
 To determine buying/leasing intervals, Student statistical function for probabilities distributions is applied. This result in a 95% confidence interval for the estimated average properties market values.  
+
+(from now on, a group of properties that share the same features (the minimal unit of analysis as described above) is referred to as a *listing*)
 
 **REMINDINGS**
 1. Data are collected in areas with sufficient real estate market movements. In 2024, OMI analysed the residential market in 1,500 Italian municipalities, where two-thirds of the national stock is located and where 72% of buying/selling movements took place.
 2. The estimation is the result of sampling procedures, which may yeld possible sampling biases. For this reason OMI constantly reviews its samples.
 3. For a complete description of the data and of procedures used to collect data and to define zones, always refer to ["Manuale dell'Osservatorio del Mercato Immobiliare"](https://www.agenziaentrate.gov.it/portale/documents/20143/265514/Manuale_OMI_2025_03_20.pdf/6ae6f18b-1632-a588-7990-bc94969f354a?t=1742814198800).
 
-(from now on, a group of properties that share the same features (the minimal unit of analysis as described above) is referred to as a *listing*)
 
-## Description of the variables in the original datasets (*translation (original name)*)
+## Description of variables in the translated and merged dataset (*translation (original name)*)
 
 -*area (Area_territoriale)*: macro areas for the listing (*NW (north-west)*, *NE (north-east)*, *C (center)*, *I (islands)*, *S (south)*);
 
 -*region (Regione)*: Region of the listing;
 
--*prov (Prov)*: Province of the listing (102; the number of Italian provinces varied in time between 101 and 110);
+-*prov (Prov)*: Province of the listing;
 
 -*mun_istat (Comune_ISTAT)*: ISTAT (National Institute of Statistic) code of the municipality;
 
@@ -61,16 +62,12 @@ To determine buying/leasing intervals, Student statistical function for probabil
 
 -*condition (Stato)*: general maintenance state of the listing (*normal*, *excellent*, *poor*);
 
--*Stato_prev*;
-
 -*buy_min (Compr_min)*: estimated minimum buying price;
 
 -*buy_max (Compr_max)*: estimated maximum buying price;
-
--*Sup_NL_compr*:
 
 -*lease_min (Loc_min)*: estimated minimum renting price;
 
 -*lease_max (Loc_max)*: estimated maximum renting price.
 
--*Sup_NL_loc*.
+*(three variables from the original datasets were removed because they were either empty or had only a single value)*
