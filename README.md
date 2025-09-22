@@ -43,7 +43,7 @@ To determine buying/leasing intervals, Student statistical function for probabil
 
 -*region (Regione)*: Region of the listing;
 
--*province (Prov)*: Province of the listing (102; the number of Italian provinces varied in time between 101 and 110);
+-*prov (Prov)*: Province of the listing (102; the number of Italian provinces varied in time between 101 and 110);
 
 -*mun_istat (Comune_ISTAT)*: ISTAT (National Institute of Statistic) code of the municipality;
 
