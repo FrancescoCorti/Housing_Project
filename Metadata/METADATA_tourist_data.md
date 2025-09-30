@@ -1,11 +1,11 @@
-## tourist_data - METADATA
+# tourist_data - METADATA
 **Data Source**: [IstatData](https://esploradati.istat.it/databrowser/#/it/dw/categories/IT1,Z0700SER,1.0/SER_TOURISM/SER_TOURISM_RELATED_FILES)\
 *Original metadata published on [Istat website](https://www.istat.it/classificazione/classificazione-dei-comuni-in-base-alla-densita-turistica/)*
 
-### Istat
+## Istat
 The *National Institute of Statistics* (Istat, Istituto Nazionale di Statistica) is an Italian national agency responsible for providing statistics to citizens and policy makers.
 
-### *tourist_data*
+## *tourist_data*
 *tourist_data* is the result of cleaning and translating the source data. This was collected in 2020 to inform policy decisions that support local tourism following the COVID-19 pandemic. 
 The purpose of this research was to propose a touristic classification of municipalities based on their geographical position and on anthropic and cultural factors such as:
 
@@ -32,10 +32,8 @@ tourism on the local economy and occupation. In the source data, a fourth variab
 For statistical modelling purposes, categorical variables related to the geographical and cultural characteristics of the locations were encoded as dummy variables. Quantitative measures 
 of tourism were encoded on a scale from 1 to 5. 
 
-**REMINDINGS**
-1. For a complete description of the data and of procedures used to collect data and to define zones, always refer to the source [metadata](https://www.istat.it/classificazione/classificazione-dei-comuni-in-base-alla-densita-turistica/).
 
-### Columns description
+## Columns description
 
 -*region*: region of the municipality;
 
@@ -64,5 +62,8 @@ of tourism were encoded on a scale from 1 to 5.
 -*economy*: impact of tourism on local economies (see above for encoding);
 
 -*summary*: summary score of *infrastructures*, *flows*, and *economy*.
+
+**REMINDINGS**
+1. For a complete description of the data and of procedures used to collect data and to define zones, always refer to the source [metadata](https://www.istat.it/classificazione/classificazione-dei-comuni-in-base-alla-densita-turistica/).
 
 
