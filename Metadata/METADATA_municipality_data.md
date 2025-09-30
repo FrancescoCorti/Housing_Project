@@ -5,7 +5,7 @@
 The *National Institute of Statistics* (Istat, Istituto Nazionale di Statistica) is an Italian national agency responsible for providing statistics to citizens and policy makers.
 
 ## *municipality_data*
-municipality_data is a dataset of Italian municipalities, containing annual population and surface area figures as of January 1st for each year from 2001 to 2024, with additional census data from 1991. The dataset is the result of pivoting and translating the source data, so that each record corresponds to a municipality-year observation.
+*municipality_data* is a dataset of Italian municipalities, containing annual population and surface area figures as of January 1st for each year from 2001 to 2024, with additional census data from 1991. The dataset is the result of pivoting and translating the source data, so that each record corresponds to a municipality-year observation.
 
 ## Columns description
 
