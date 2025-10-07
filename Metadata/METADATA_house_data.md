@@ -35,7 +35,7 @@ To determine buying/leasing intervals, Student statistical function for probabil
 ## Feature engineering
 Certain variables were manipulated or created in order to make the data more suitable for analysis.
 
--to track the price of listings over time, a listing ID was created with consideration to unique listings identifiers such as their province, Istat code, name of the municipality, sector, zone, type of building, and conditions. The result was 522,240 unique tuples [ID, semester], of which only 1430 were duplicates. This guaranteed the possibility of tracking the price of IDs over time, with an average of ~14 available semester prices per listing;
+-to track the price of listings over time, a listing ID was created with consideration to unique listings identifiers such as their province, Istat code, sector, zone, type of building, and conditions. The result was 522,240 unique tuples [ID, semester], of which only 1430 were duplicates. This guaranteed the possibility of tracking the price of IDs over time, with an average of ~14 available semester prices per listing;
 
 -the semester variable (of the type 20**_S*) was split into two distinct variables, one for the year and one for the semester (1 or 2);
 
