@@ -29,7 +29,7 @@
 - _ratio_hotel_mun_: ratio of the number of hotel beds to the population in i at t;
 - _ratio_str_beds_: ratio of the number of holiday dwellings (defined by Istat as dwellings used as a tourism investment; we call them Short Term Rentals (str)) beds to the total number of tourist beds in i at t;
 - _ratio_str_mun_: ratio of the number of dwellings used as STR to the total number of dwellings in i at t;
-- _ratio_str_mun_beds_ ratio of the number of STR beds to the population in i at t;
+- _ratio_str_mun_beds_: ratio of the number of STR beds to the population in i at t;
 - _ratio_arrivals_: ratio of the number of total arrivals to the population in i at t;
 - _ratio_arrivals_foreigners_: ratio of the number of foreign arrivals to the population in i at t;
 - _tourism_score_: score computed as the average value of Van der Waerden ranking score of tourism variables;
