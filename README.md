@@ -1,4 +1,4 @@
-**Metadata - model_data.parquet**
+**Metadata - model_data.parquet [output of engineering.ipynb]**
 - _mun_istat_: ISTAT codes;
 - _year_: year of the listing (t);
 - _covid_: dummy for covid years (0 = before (2014-2019), 1 = during/after (2020-2024));
