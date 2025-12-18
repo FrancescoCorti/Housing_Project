@@ -3,26 +3,33 @@
 - _year_: year of the listing (t);
 - _covid_: dummy for covid years (0 = before (2014-2019), 1 = during/after (2020-2024));
 - _mun_name_: name of the municipality (i);
-- _mun_name_norm_: normalised name of i;
-- _region_: region of i;
-- _prov_: provincial code (for instance, Milan: MI) of i;
+- _mun_name_norm_: normalised name;
+- _region_: region;
+- _prov_: provincial code (for instance, Milan: MI);
+- _prov_istat_: provincial Istat code;
 - _sector_: OMI subdivision of municipal area (B: central, C: semi-central, D: outskirt, E: suburban, R: extraurban);
 - _type_: dwelling type (residential housing, lowcost housing, independent houses and villas);
 - _condition_: condition of the dwelling (excellent, normal, poor);
 - _log_buy_min_: minimum estimated logged buying value (price per sqm) in i at t;
 - _log_buy_max_: maximum estimated logged buying value (price per sqm) in i at t;
-- _log_buy_avg_: average of _log_buy_min_ and _log_buy_max_ (price per sqm) in i at t;
-- _log_population_: logged population of i at t;
-- _mun_class_pop_: classification of i based on population (Small < 3,000, Medium < 10,000, Large < 50,000, Very large < 150,000, Metropoly >=150,000) [TO REVIEW],
-- _log_median_income_: logged median income in i at t;
+- _log_buy_avg_: average estimated logged buying price (price per sqm) in i at t;
+- _population_: population of i at t;
+- _log_population_: logged population;
+- _mun_class_pop_: classification of i based on population (Small < 3,000, Medium < 10,000, Large < 50,000, Very large < 150,000, Metropoly >=150,000) [TO REVIEW];
+- _reg_age_avg_: average regional age at t;
+- _over65_: regional percentage of over 65s;
+- _log_median_income_: logged median income in i at t (lagged by 1 year);
 - _dwellings_: number of dwellings in i in 2021;
+- _log_dwellings_: logged number of dwellings;
 - _prov_immigration_: number of immigrants in the province at t (lagged by 1 year);
 - _prov_emigration_: number of emigrants in the province at t (lagged by 1 year);
 - _prov_net_movements_: difference between the number of immigrants and emigrants in the province at t (lagged by 1 year);
 - _log_real_gdp_: national logged value of the real Gross Domestic Product at t (lagged by 1 year);
+- _gdp_growth_: annual national gdp growth (lagged by 1 year);
 - _cpi_: national Consumer Price Index at t (lagged by 1 year);
+- _cpi_growth_: annual national CPI growth (lagged by 1 year)
 - _gini_: national Gini index at t (lagged by 1 year);
-- _unemployment_: national unemployment rate from 15 to 64 years old at t (lagged by 1 year);
+- _unemployment_prov: provincial unemployment rate at t;
 - _birth_rate_: national birth rate at t (lagged by 1 year);
 - _life_: national life expentancy at t (lagged by 1 year);
 - _ratio_hotel_beds_: ratio of the number of hotel beds to the total number of tourist beds in i at t;
@@ -34,7 +41,4 @@
 - _ratio_arrivals_foreigners_: ratio of the number of foreign arrivals to the population in i at t;
 - _tourism_score_: score computed as the average value of Van der Waerden ranking score of tourism variables;
 - _tourism_class_2014_: classification of i based on their tourism score in 2014 (Zero (for i with no tourism flow, i.e. no arrivals, in 2014), Low, Moderate, High);
-- _tourism_class_2024_: classification of i based on their tourism score in 2024 (Zero (for i with no tourism flow, i.e. no arrivals, in 2024), Low, Moderate, High);
-- _log_buy_avg_diff_: differenced logged average buying values (ONLY FOR VISUALISATION);
-- _log_difference_diff_: differenced logged population values (ONLY FOR VISUALISATION);
-- _log_median_income_diff_: differenced logged average buying value (ONLY FOR VISUALISATION).
+- _tourism_class_2024_: classification of i based on their tourism score in 2024 (Zero (for i with no tourism flow, i.e. no arrivals, in 2024), Low, Moderate, High).
