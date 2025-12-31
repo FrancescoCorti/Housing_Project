@@ -41,4 +41,4 @@
 - _ratio_arrivals_foreigners_: ratio of the number of foreign arrivals to the population in i at t;
 - _tourism_score_: score computed as the average value of Van der Waerden ranking score of tourism variables;
 - _tourism_class_2014_: classification of i based on their tourism score in 2014 (Zero (for i with no tourism flow, i.e. no arrivals, in 2014), Low, Moderate, High);
-- _tourism_class_2024_: classification of i based on their tourism score in 2024 (Zero (for i with no tourism flow, i.e. no arrivals, in 2024), Low, Moderate, High).
+- _tourism_class_2024_: classification of i based on their tourism score in 2024 (Zero (for i with no tourism flow, i.e. no arrivals, in 2024), Low, Moderate, High).  
