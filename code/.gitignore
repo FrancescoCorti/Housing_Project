@@ -11,7 +11,7 @@ __pycache__/
 .vscode/
 
 # Datasets
-*.parquet
-*.csv
-*.xlsx
-*.gpkg/
+.parquet
+.csv
+.xlsx
+.gpkg/
