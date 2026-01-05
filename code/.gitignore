@@ -10,8 +10,8 @@ __pycache__/
 # VS Code
 .vscode/
 
-# Datasets
-.parquet
-.csv
-.xlsx
-.gpkg/
+# Ignore datasets in any folder
+**/*.parquet
+**/*.csv
+**/*.xlsx
+**/*.gpkg
