@@ -1,0 +1,17 @@
+# Virtual environments
+.venv_housing/
+venv/
+env/
+
+# Python cache
+__pycache__/
+*.pyc
+
+# VS Code
+.vscode/
+
+# Datasets
+.parquet
+.csv
+.xlsx
+.gpkg/
