@@ -6,25 +6,22 @@ library(modelsummary)
 library(tibble)
 
 # PROVINCE
-df <- read.csv('C:/Users/HP/Desktop/Traineeship/Code/datasets/prov_model_data.csv')
+df <- read.csv('C:/Users/HP/Desktop/Traineeship/Code/code/datasets/model.csv')
 
 pdata <- pdata.frame(df, index=c("prov","year"))
 
 # PROVINCE FE 
 fe_model <- plm(
-  log_buy_avg ~
-    #lag(log_buy_avg, 1) +
-    tourism_score +
-    log_median_income +
-    log_population +
-    reg_age_avg +
-    over65 +
-    prov_net_movements +
-    unemployment_prov +
-    #dwellings : log_population_growth +
-    #factor(type) : tourism_score,
-    log_nominal_gdp,
-    #log_tour_employed,
+  log_prov_buy_max_wgt ~
+    lag(log_prov_buy_max_wgt, 1) +
+    log_tourism_index_vdw +
+    log_prov_median_income_wgt +
+    log_prov_population +
+    log_reg_age_avg +
+    log_prov_immigration +
+    log_prov_unemployment +
+    log_nominal_gdp +
+    log_interest_rate,
     data = pdata,
   index = c("prov", "year"),
   model = "within",
@@ -36,29 +33,31 @@ summary(fe_model)
 
 # PROVINCE - system-GMM (LEVEL)
 sys_model <- pgmm(
-  log_buy_max ~ 
-    lag(log_buy_max, 1) +
-    tourism_score +
+  log_prov_buy_max_wgt ~ 
+    lag(log_prov_buy_max_wgt, 1) +
+    log_tourism_index_vdw +
     # ratio_hotel_beds +
     # ratio_hotel_mun +
     # ratio_str_beds +
     # ratio_str_mun +
-    log_median_income +
-    log_population +
-    reg_age_avg +
+    log_prov_median_income_wgt +
+    log_prov_population +
+    log_reg_age_avg +
     #over65 +
     log_prov_immigration +
-    unemployment_prov +
-    log_nominal_gdp |
-    lag(log_buy_avg, 2:10) +
-    lag(log_median_income, 2:10) +
-    lag(unemployment_prov, 2:10) +
-    lag(log_population, 2:10) +
+    log_prov_unemployment +
+    log_nominal_gdp +
+    log_interest_rate |
+    lag(log_prov_buy_max_wgt, 2:10) +
+    lag(log_tourism_index_vdw, 2:10) +
+    lag(log_prov_median_income_wgt, 2:10) +
+    lag(log_prov_unemployment, 2:10) +
+    lag(log_prov_population, 2:10) +
     #lag(reg_age_avg, 2:10) +
     #lag(over65, 2:10) +
     lag(log_prov_immigration, 2:10) +
     lag(log_nominal_gdp, 2:10) +
-    lag(tourism_score, 2:10),
+    lag(log_interest_rate, 2:10),
   data = pdata,
   effect = "individual",
   model = "twostep",
