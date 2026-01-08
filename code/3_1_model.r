@@ -15,23 +15,28 @@ pdata <- pdata.frame(df, index=c("prov","year"))
 
 pdata_cap <- pdata.frame(df_cap, index=c("mun_istat","year"))
 
-
+summary(pdata)
 
 # VIF
 fe_model <- plm(
   log_prov_buy_max_wgt ~
     #lag(log_prov_buy_max_wgt, 1) +
     log_tourism_index_vdw +
+    #log_prov_ratio_hotel_mun +
+    #log_prov_ratio_str_mun_beds +
+    #log_prov_ratio_str_mun +
+    #log_prov_ratio_arrivals +
+    #log_prov_ratio_arrivals_foreigners +
     log_prov_median_income_wgt +
-    #log_prov_population +
-    prov_density +
-    log_reg_age_avg +
-    log_over65 +
+    log_prov_population +
+    #log_reg_age_avg +
+    #log_over65 +
     log_prov_immigration +
-    log_prov_unemployment +
+    #log_prov_emigration +
+    #log_prov_unemployment +
     log_nominal_gdp +
     log_interest_rate +
-    log_life +
+    #log_life +
     covid,
     data = pdata,
   index = c("prov", "year"),
@@ -46,13 +51,16 @@ fe_model <- plm(
   log_prov_buy_max_wgt ~
     #lag(log_prov_buy_max_wgt, 1) +
     log_tourism_index_vdw +
+    #log_prov_ratio_hotel_mun +
+    #log_prov_ratio_str_mun_beds +
+    #log_prov_ratio_str_mun +
     log_prov_median_income_wgt +
     log_prov_population +
     #prov_density +
     log_reg_age_avg +
     log_over65 +
     log_prov_immigration +
-    log_prov_unemployment +
+    #log_prov_unemployment +
     log_life +
     log_nominal_gdp +
     log_interest_rate +
@@ -91,13 +99,13 @@ summary(fe_model_cap)
 
 
 
-##########################################################################################################à
+##########################################################################################################
 
 # PROVINCE - system-GMM (LEVEL)
 sys_model <- pgmm(
   log_prov_buy_max_wgt ~ 
     lag(log_prov_buy_max_wgt, 1) +
-    log_tourism_index_pca +
+    log_tourism_index_vdw +
     # ratio_hotel_beds +
     # ratio_hotel_mun +
     # ratio_str_beds +
@@ -106,20 +114,25 @@ sys_model <- pgmm(
     log_prov_population +
     #prov_density +
     log_reg_age_avg +
+    #log_life +
     #log_over65 +
     log_prov_immigration +
+    #log_prov_emigration +
     #log_prov_unemployment +
     log_nominal_gdp +
     log_interest_rate |
+    #covid |
     lag(log_prov_buy_max_wgt, 2:10) +
-    lag(log_tourism_index_pca, 2:10) +
+    lag(log_tourism_index_vdw, 2:10) +
     lag(log_prov_median_income_wgt, 2:10) +
     #lag(log_prov_unemployment, 2:10) +
     lag(log_prov_population, 2:10) +
     #lag(prov_density, 2:10) +
     lag(log_reg_age_avg, 2:10) +
+    #lag(log_life, 2:10) +
     #lag(log_over65, 2:10) +
     lag(log_prov_immigration, 2:10) +
+    #lag(log_prov_emigration, 2:10) +
     lag(log_nominal_gdp, 2:10) +
     lag(log_interest_rate, 2:10),
   data = pdata,
@@ -146,20 +159,25 @@ sys_model_cap <- pgmm(
     log_population +
     #prov_density +
     log_reg_age_avg +
+    #log_life +
     #log_over65 +
     log_prov_immigration +
+    #log_prov_emigration +
     #log_prov_unemployment +
     log_nominal_gdp +
     log_interest_rate |
+    #covid |
     lag(log_buy_max, 2:10) +
-    lag(log_tourism_index_pca, 2:10) +
+    lag(log_tourism_index_vdw, 2:10) +
     lag(log_median_income, 2:10) +
     #lag(log_prov_unemployment, 2:10) +
     lag(log_population, 2:10) +
     #lag(prov_density, 2:10) +
-    lag(log_reg_age_avg, 2:10) +
+    #lag(log_reg_age_avg, 2:10) +
+    #lag(log_life, 2:10) +
     #lag(log_over65, 2:10) +
     lag(log_prov_immigration, 2:10) +
+    #lag(log_prov_emigration, 2:10) +
     lag(log_nominal_gdp, 2:10) +
     lag(log_interest_rate, 2:10),
   data = pdata_cap,
@@ -167,7 +185,7 @@ sys_model_cap <- pgmm(
   model = "twostep",
   collapse = TRUE,
   transformation = "ld", # ld for system-GMM and d for difference-GMM
-  index = c("prov", "year")
+  index = c("mun_istat", "year")
 )
 
 summary(sys_model_cap, robust = TRUE, time.dummies = FALSE)
@@ -302,6 +320,7 @@ sys_model_growth <- pgmm(
     #d_log_over65 +
     d_log_reg_age_avg +
     d_log_prov_immigration +
+    #d_log_prov_emigration +
     #d_log_prov_unemployment +
     d_log_nominal_gdp +
     d_log_interest_rate |
@@ -313,6 +332,7 @@ sys_model_growth <- pgmm(
     #lag(d_log_over65, 2:10) +
     lag(d_log_reg_age_avg, 2:10) +
     lag(d_log_prov_immigration, 2:10) +
+    #lag(d_log_prov_emigration, 2:10) +
     lag(d_log_nominal_gdp, 2:10) +
     lag(d_log_interest_rate, 2:10),
   data = pdata1,
@@ -335,7 +355,7 @@ pdata1_cap <- pdata.frame(growth_data_cap, index=c("mun_istat","year"))
 sys_model_growth_cap <- pgmm(
   d_log_buy_max ~ 
     lag(d_log_buy_max, 1) +
-    d_log_tourism_index_pca +
+    d_log_tourism_index_vdw +
     # ratio_hotel_beds +
     # ratio_hotel_mun +
     # ratio_str_beds +
@@ -349,7 +369,7 @@ sys_model_growth_cap <- pgmm(
     d_log_nominal_gdp +
     d_log_interest_rate |
     lag(d_log_buy_max, 2:10) +
-    lag(d_log_tourism_index_pca, 2:10) +
+    lag(d_log_tourism_index_vdw, 2:10) +
     lag(d_log_median_income, 2:10) +
     #lag(d_log_prov_unemployment, 2:10) +
     lag(d_log_population, 2:10) +
@@ -369,30 +389,30 @@ sys_model_growth_cap <- pgmm(
 summary(sys_model_growth_cap, robust = TRUE, time.dummies = FALSE)
 
 
+
 # INTERACTIONS
 pdata1$tourism_population <- pdata1$d_log_tourism_index_pca * pdata1$log_prov_population
-pdata1$tourism_density <- pdata1$d_log_tourism_index_vdw * pdata1$prov_density
 
 
 sys_model_growth_i <- pgmm(
   d_log_prov_buy_max_wgt ~ 
     lag(d_log_prov_buy_max_wgt, 1) +
-    d_log_tourism_index_pca +
+    d_log_tourism_index_vdw +
     # ratio_hotel_beds +
     # ratio_hotel_mun +
     # ratio_str_beds +
     # ratio_str_mun +
     tourism_population +
-    d_log_prov_median_income_wgt +
     d_log_prov_population +
+    d_log_prov_median_income_wgt +
     #d_log_over65 +
     d_log_reg_age_avg +
     d_log_prov_immigration +
-    d_log_prov_unemployment +
+    #d_log_prov_unemployment +
     d_log_nominal_gdp +
     d_log_interest_rate |
     lag(d_log_prov_buy_max_wgt, 2:10) +
-    lag(d_log_tourism_index_pca, 2:10) +
+    lag(d_log_tourism_index_vdw, 2:10) +
     lag(d_log_prov_median_income_wgt, 2:10) +
     lag(tourism_population, 2:10) +
     #lag(tourism_income, 2:10) +
@@ -414,78 +434,44 @@ sys_model_growth_i <- pgmm(
 summary(sys_model_growth_i, robust = TRUE, time.dummies = FALSE)
 
 
-gmm_tourism_quartile <- pgmm(
-  d_log_prov_buy_max_wgt ~ 
-    lag(d_log_prov_buy_max_wgt, 1) +
-    tourism_q2 +
-    tourism_q3 +
-    tourism_q4 +
-    d_log_prov_median_income_wgt +
-    d_log_prov_population +
+# INTERACTIONS
+pdata1_cap$tourism_population <- pdata1$d_log_tourism_index_pca * pdata1$log_prov_population
+
+# CAPITALS - system-GMM (GROWTH) - INETRACTED
+sys_model_growth_cap_i <- pgmm(
+  d_log_buy_max ~ 
+    lag(d_log_buy_max, 1) +
+    d_log_tourism_index_vdw +
+    # ratio_hotel_beds +
+    # ratio_hotel_mun +
+    # ratio_str_beds +
+    # ratio_str_mun +
+    tourism_population +
+    d_log_median_income +
+    d_log_population +
     #d_log_over65 +
     d_log_reg_age_avg +
     d_log_prov_immigration +
     #d_log_prov_unemployment +
     d_log_nominal_gdp +
     d_log_interest_rate |
-    lag(d_log_prov_buy_max_wgt, 2:10) +
-    lag(tourism_q2, 2:10) +
-    lag(tourism_q3, 2:10) +
-    lag(tourism_q4, 2:10) +
-    lag(d_log_prov_median_income_wgt, 2:10) +
-    lag(d_log_prov_population, 2:10) +
+    lag(d_log_buy_max, 2:10) +
+    lag(d_log_tourism_index_vdw, 2:10) +
+    lag(d_log_median_income, 2:10) +
+    #lag(d_log_prov_unemployment, 2:10) +
+    lag(tourism_population, 2:10) +
+    lag(d_log_population, 2:10) +
     #lag(d_log_over65, 2:10) +
     lag(d_log_reg_age_avg, 2:10) +
     lag(d_log_prov_immigration, 2:10) +
-    #lag(d_log_prov_unemployment, 2:10) +
     lag(d_log_nominal_gdp, 2:10) +
     lag(d_log_interest_rate, 2:10),
-  data = pdata1,
+  data = pdata1_cap,
   effect = "individual",
   model = "twostep",
   collapse = TRUE,
-  transformation = "ld",
-  index = c("prov", "year")
+  transformation = "ld", # ld for system-GMM and d for difference-GMM
+  index = c("mun_istat", "year")
 )
 
-summary(gmm_tourism_quartile, robust = TRUE, time.dummies = FALSE)
-
-
-
-gmm_tourism_buy <- pgmm(
-  d_log_prov_buy_max_wgt ~ 
-    lag(d_log_prov_buy_max_wgt, 1) +
-    tourism_buy_q2 +
-    tourism_buy_q3 +
-    tourism_buy_q4 +
-    d_log_prov_median_income_wgt +
-    tourism_population +
-    d_log_prov_population +
-    #d_log_over65 +
-    d_log_reg_age_avg +
-    d_log_prov_immigration +
-    d_log_prov_unemployment +
-    d_log_nominal_gdp +
-    d_log_interest_rate |
-    lag(d_log_prov_buy_max_wgt, 2:10) +
-    lag(tourism_buy_q2, 2:10) +
-    lag(tourism_buy_q3, 2:10) +
-    lag(tourism_buy_q4, 2:10) +
-    lag(d_log_prov_median_income_wgt, 2:10) +
-    lag(d_log_prov_population, 2:10) +
-    #lag(d_log_over65, 2:10) +
-    lag(d_log_reg_age_avg) +
-    lag(d_log_prov_immigration, 2:10) +
-    #lag(d_log_prov_unemployment, 2:10) +
-    lag(d_log_nominal_gdp, 2:10) +
-    lag(d_log_interest_rate, 2:10),
-  data = pdata1,
-  effect = "individual",
-  model = "twostep",
-  collapse = TRUE,
-  transformation = "ld",
-  index = c("prov", "year")
-)
-
-summary(gmm_tourism_buy, robust = TRUE, time.dummies = FALSE)
-
+summary(sys_model_growth_cap_i, robust = TRUE, time.dummies = FALSE)
