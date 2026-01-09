@@ -9,24 +9,45 @@ library(car)
 # PROVINCE
 df <- read.csv('C:/Users/HP/Desktop/Traineeship/Code/code/datasets/model.csv')
 
-df_cap <- read.csv('C:/Users/HP/Desktop/Traineeship/Code/code/datasets/model_capital.csv')
-
 pdata <- pdata.frame(df, index=c("prov","year"))
+
+
+# CAPITALS
+df_cap <- read.csv('C:/Users/HP/Desktop/Traineeship/Code/code/datasets/model_capital.csv')
 
 pdata_cap <- pdata.frame(df_cap, index=c("mun_istat","year"))
 
-summary(pdata)
+
+# UNIT-ROOT TESTS
+# Levin-Lin-Chu
+purtest(
+  pdata$log_prov_buy_max_wgt,
+  test = "levinlin",
+  exo = "intercept",
+  lags = 1
+)
+
+# Im-Pesaran-Shin
+purtest(
+  pdata$log_prov_buy_max_wgt,
+  test = "ips",
+  exo = "intercept",
+  lags = 1
+)
+
+# Maddala-Wu
+purtest(
+  pdata$log_prov_buy_max_wgt,
+  test = "madwu",
+  exo = "intercept",
+  lags = 1
+)
+
 
 # VIF
-fe_model <- plm(
+vif <- plm(
   log_prov_buy_max_wgt ~
-    #lag(log_prov_buy_max_wgt, 1) +
     log_tourism_index_vdw +
-    #log_prov_ratio_hotel_mun +
-    #log_prov_ratio_str_mun_beds +
-    #log_prov_ratio_str_mun +
-    #log_prov_ratio_arrivals +
-    #log_prov_ratio_arrivals_foreigners +
     log_prov_median_income_wgt +
     log_prov_population +
     #log_reg_age_avg +
@@ -37,13 +58,14 @@ fe_model <- plm(
     log_nominal_gdp +
     log_interest_rate +
     #log_life +
-    covid,
+    covid +
+    log_cpi_index,
     data = pdata,
   index = c("prov", "year"),
   model = "pooling"
   )
 
-vif(fe_model)
+vif(vif)
 
 
 # PROVINCE FE 
