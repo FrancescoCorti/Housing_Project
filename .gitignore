@@ -5,3 +5,4 @@ venv/
 datasets/
 __pycache__/
 *.pyc
+notes.md

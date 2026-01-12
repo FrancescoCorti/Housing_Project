@@ -1,7 +1,12 @@
-ENGINEERING
-1. Find a way to include nights of stay inside tourism indeces (possibly standardised with population) x 
-2. Include other types of accomodations (beds standardised with population). x 
+ENGINEERING - TOURISM INDECES
 
+Tourism index is constructed upon nights of stay (tourism pressure), number of beds (tourism capacity), number of str (residential displacement).
+
+
+PRE ANALYSIS
+1. Visualise data -> MANDATORY
+2. Descriptive statistics
+3. Unit-root (check whether the introduction of the lagged outcome variable is appropriate)
 
 
 MODELS
