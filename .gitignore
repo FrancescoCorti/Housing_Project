@@ -1,0 +1,8 @@
+.venv_housing/
+venv_housing/
+.venv/
+venv/
+datasets/
+__pycache__/
+*.pyc
+notes.md
