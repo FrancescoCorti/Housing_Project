@@ -138,6 +138,21 @@ fe_model_cap <- plm(
 
 summary(fe_model_cap)
 
+
+# measure persistency
+
+pool_ar1 <- plm(log_prov_buy_max_wgt ~ lag(log_prov_buy_max_wgt, 1),
+                data = pdata,
+                model = "pooling")
+
+summary(pool_ar1)
+
+fe_ar1 <- plm(log_prov_buy_max_wgt ~ lag(log_prov_buy_max_wgt, 1),
+                data = pdata,
+                model = "within")
+
+summary(fe_ar1)
+
 ##########################################################################################################
 
 # SYSTEM-GMM LEVEL
