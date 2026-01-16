@@ -28,7 +28,7 @@ pdata_cap <- pdata.frame(df_cap, index=c("mun_istat","year"))
 # CONTROL TESTS
 
 
-# UNIT-ROOT TESTS
+# UNIT-ROOT TESTS - PROVINCE
 # Levin-Lin-Chu -  
 # The test procedures are designed to evaluate the null hypothesis that each individual in the panel 
 # has integrated time series versus the alternative hypothesis that all individuals time series are stationary.
@@ -61,14 +61,48 @@ purtest(
 )
 
 
+# UNIT-ROOT TESTS - CAPITALS
+# Levin-Lin-Chu -  
+# The test procedures are designed to evaluate the null hypothesis that each individual in the panel 
+# has integrated time series versus the alternative hypothesis that all individuals time series are stationary.
+
+purtest(
+  pdata_cap$log_buy_max,
+  test = "levinlin",
+  exo = "intercept",
+  lags = 1
+)
+
+# Im-Pesaran-Shin
+# It also allows for some (but not all) of the individual series to have unit roots under the alternative hypothesis.
+# H1: a satisfactory number (stationary/unit root = non zero) of individual processes is stationary 
+purtest(
+  pdata_cap$log_buy_max,
+  test = "ips",
+  exo = "intercept",
+  lags = 1
+)
+
+# Maddala-Wu
+# The idea behind this test is to break up the hypothesis H0 : ri à 0 for alli, i à 1, 2, . . . , N into a set of 
+# sub-hypotheses H0i: ri à 0 and noting thatH0 is wrong if and only if any of its components H0i is wrong.
+purtest(
+  pdata_cap$log_buy_max,
+  test = "madwu",
+  exo = "intercept",
+  lags = 1
+)
+
+
 # VIF - MAIN MODEL
 vif <- plm(
   log_prov_buy_max_wgt ~
-    log_tourism_index_vdw +
+    log_tourism_index_rnk +
     log_prov_median_income_wgt +
     log_prov_population +
     log_prov_immigration +
-    log_nominal_gdp +
+    log_prov_unemployment +
+    log_real_gdp +
     log_interest_rate,
   data = pdata,
   index = c("prov", "year"),
@@ -87,7 +121,8 @@ vif <- plm(
     log_prov_median_income_wgt +
     log_prov_population +
     log_prov_immigration +
-    log_nominal_gdp +
+    log_prov_unemployment +
+    log_real_gdp +
     log_interest_rate,
     data = pdata,
   index = c("prov", "year"),
@@ -106,11 +141,11 @@ vif(vif)
 fe_model <- plm(
   log_prov_buy_max_wgt ~
     #lag(log_prov_buy_max_wgt, 1) +
-    log_tourism_index_vdw +
+    log_tourism_index_rnk +
     log_prov_median_income_wgt +
     log_prov_population +
     log_prov_immigration +
-    log_nominal_gdp +
+    log_real_gdp +
     log_interest_rate,
   data = pdata,
   index = c("prov", "year"),
@@ -128,7 +163,7 @@ fe_model_cap <- plm(
     log_median_income +
     log_population +
     log_prov_immigration +
-    log_nominal_gdp +
+    log_real_gdp +
     log_interest_rate,
   data = pdata_cap,
   index = c("mun_istat", "year"),
@@ -159,20 +194,22 @@ summary(fe_ar1)
 
 # PROVINCE - system-GMM (LEVEL)
 sys_model <- pgmm(
-  log_prov_buy_max_wgt ~ 
-    lag(log_prov_buy_max_wgt, 1) +
-    log_tourism_index_vdw +
+  log_prov_buy_min_wgt ~ 
+    lag(log_prov_buy_min_wgt, 1) +
+    log_tourism_index_rnk +
     log_prov_median_income_wgt +
     log_prov_population +
     log_prov_immigration +
-    log_nominal_gdp +
+    log_prov_unemployment +
+    log_real_gdp +
     log_interest_rate |
-    lag(log_prov_buy_max_wgt, 2:10) +
-    lag(log_tourism_index_vdw, 2:10) +
+    lag(log_prov_buy_min_wgt, 2:10) +
+    lag(log_tourism_index_rnk, 2:10) +
     lag(log_prov_median_income_wgt, 2:10) +
     lag(log_prov_population, 2:10) +
     lag(log_prov_immigration, 2:10) +
-    lag(log_nominal_gdp, 2:10) +
+    lag(log_prov_unemployment, 2:10) +
+    lag(log_real_gdp, 2:10) +
     lag(log_interest_rate, 2:10),
   data = pdata,
   effect = "individual",
@@ -188,23 +225,25 @@ summary(sys_model, robust = TRUE, time.dummies = FALSE)
 # PROVINCE - system-GMM (LEVEL) - NO INDEX
 sys_model <- pgmm(
   log_prov_buy_max_wgt ~ 
-    lag(log_prov_buy_max_wgt, 1) +
-    log_prov_ratio_tot_beds +
+    lag(log_prov_buy_min_wgt, 1) +
+    #log_prov_ratio_tot_beds +
     log_prov_ratio_tot_nights +
     log_prov_ratio_str_houses +
     log_prov_median_income_wgt +
     log_prov_population +
     log_prov_immigration +
-    log_nominal_gdp +
+    log_prov_unemployment +
+    log_real_gdp +
     log_interest_rate |
-    lag(log_prov_buy_max_wgt, 2:10) +
-    lag(log_prov_ratio_tot_beds, 2:10) +
+    lag(log_prov_buy_min_wgt, 2:10) +
+    #lag(log_prov_ratio_tot_beds, 2:10) +
     lag(log_prov_ratio_tot_nights, 2:10) +
     lag(log_prov_ratio_str_houses, 2:10) +
     lag(log_prov_median_income_wgt, 2:10) +
     lag(log_prov_population, 2:10) +
     lag(log_prov_immigration, 2:10) +
-    lag(log_nominal_gdp, 2:10) +
+    lag(log_prov_unemployment, 2:10) +
+    lag(log_real_gdp, 2:10) +
     lag(log_interest_rate, 2:10),
   data = pdata,
   effect = "individual",
@@ -221,18 +260,22 @@ summary(sys_model, robust = TRUE, time.dummies = FALSE)
 sys_model_cap <- pgmm(
   log_buy_max ~ 
     lag(log_buy_max, 1) +
-    log_tourism_index_vdw +
+    log_tourism_index_rnk +
     log_median_income +
     log_population +
     log_prov_immigration +
-    log_nominal_gdp +
+    log_prov_unemployment +
+    log_reg_age_avg +
+    log_real_gdp +
     log_interest_rate |
     lag(log_buy_max, 2:10) +
-    lag(log_tourism_index_vdw, 2:10) +
+    lag(log_tourism_index_rnk, 2:10) +
     lag(log_median_income, 2:10) +
     lag(log_population, 2:10) +
     lag(log_prov_immigration, 2:10) +
-    lag(log_nominal_gdp, 2:10) +
+    lag(log_prov_unemployment, 2:10) +
+    lag(log_reg_age_avg, 2:10) +
+    lag(log_real_gdp, 2:10) +
     lag(log_interest_rate, 2:10),
   data = pdata_cap,
   effect = "individual",
@@ -255,7 +298,8 @@ sys_model_cap <- pgmm(
     log_median_income +
     log_population +
     log_prov_immigration +
-    log_nominal_gdp +
+    log_prov_unemployment +
+    log_real_gdp +
     log_interest_rate |
     lag(log_buy_max, 2:10) +
     lag(log_ratio_tot_beds, 2:10) +
@@ -264,7 +308,8 @@ sys_model_cap <- pgmm(
     lag(log_median_income, 2:10) +
     lag(log_population, 2:10) +
     lag(log_prov_immigration, 2:10) +
-    lag(log_nominal_gdp, 2:10) +
+    lag(log_prov_unemployment, 2:10) +
+    lag(log_real_gdp, 2:10) +
     lag(log_interest_rate, 2:10),
   data = pdata_cap,
   effect = "individual",
@@ -290,18 +335,20 @@ pdata1 <- pdata.frame(growth_data, index=c("prov","year"))
 sys_model_growth <- pgmm(
   d_log_prov_buy_max_wgt ~ 
     lag(d_log_prov_buy_max_wgt, 1) +
-    d_log_tourism_index_vdw +
+    d_log_tourism_index_rnk +
     d_log_prov_median_income_wgt +
     d_log_prov_population +
     d_log_prov_immigration +
-    d_log_nominal_gdp +
+    d_log_prov_unemployment +
+    d_log_real_gdp +
     d_log_interest_rate |
     lag(d_log_prov_buy_max_wgt, 2:10) +
-    lag(d_log_tourism_index_vdw, 2:10) +
+    lag(d_log_tourism_index_rnk, 2:10) +
     lag(d_log_prov_median_income_wgt, 2:10) +
     lag(d_log_prov_population, 2:10) +
     lag(d_log_prov_immigration, 2:10) +
-    lag(d_log_nominal_gdp, 2:10) +
+    lag(d_log_prov_unemployment, 2:10) +
+    lag(d_log_real_gdp, 2:10) +
     lag(d_log_interest_rate, 2:10),
   data = pdata1,
   effect = "individual",
@@ -324,7 +371,8 @@ sys_model_growth_no <- pgmm(
     d_log_prov_median_income_wgt +
     d_log_prov_population +
     d_log_prov_immigration +
-    d_log_nominal_gdp +
+    d_log_prov_unemployment +
+    d_log_real_gdp +
     d_log_interest_rate |
     lag(d_log_prov_buy_max_wgt, 2:10) +
     lag(d_log_prov_ratio_tot_beds, 2:10) +
@@ -333,7 +381,8 @@ sys_model_growth_no <- pgmm(
     lag(d_log_prov_median_income_wgt, 2:10) +
     lag(d_log_prov_population, 2:10) +
     lag(d_log_prov_immigration, 2:10) +
-    lag(d_log_nominal_gdp, 2:10) +
+    lag(d_log_prov_unemployment, 2:10) +
+    lag(d_log_real_gdp, 2:10) +
     lag(d_log_interest_rate, 2:10),
   data = pdata1,
   effect = "individual",
@@ -359,14 +408,14 @@ sys_model_growth_cap <- pgmm(
     d_log_median_income +
     d_log_population +
     d_log_prov_immigration +
-    d_log_nominal_gdp +
+    d_log_real_gdp +
     d_log_interest_rate |
     lag(d_log_buy_max, 2:10) +
     lag(d_log_tourism_index_vdw, 2:10) +
     lag(d_log_median_income, 2:10) +
     lag(d_log_population, 2:10) +
     lag(d_log_prov_immigration, 2:10) +
-    lag(d_log_nominal_gdp, 2:10) +
+    lag(d_log_real_gdp, 2:10) +
     lag(d_log_interest_rate, 2:10),
   data = pdata1_cap,
   effect = "individual",
@@ -389,7 +438,7 @@ sys_model_growth_cap_no <- pgmm(
     d_log_median_income +
     d_log_population +
     d_log_prov_immigration +
-    d_log_nominal_gdp +
+    d_log_real_gdp +
     d_log_interest_rate |
     lag(d_log_buy_max, 2:10) +
     lag(d_log_ratio_tot_beds, 2:10) +
@@ -398,7 +447,7 @@ sys_model_growth_cap_no <- pgmm(
     lag(d_log_median_income, 2:10) +
     lag(d_log_population, 2:10) +
     lag(d_log_prov_immigration, 2:10) +
-    lag(d_log_nominal_gdp, 2:10) +
+    lag(d_log_real_gdp, 2:10) +
     lag(d_log_interest_rate, 2:10),
   data = pdata1_cap,
   effect = "individual",
