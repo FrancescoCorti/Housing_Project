@@ -4,5 +4,11 @@ venv_housing/
 venv/
 datasets/
 __pycache__/
+documents/
+
 *.pyc
 notes.md
+
+
+1_9_macro_data_old.ipynb
+1_10_tourism_employment.ipynb

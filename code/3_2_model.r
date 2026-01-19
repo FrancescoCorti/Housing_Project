@@ -16,19 +16,13 @@ df <- read.csv('C:/Users/HP/Desktop/Traineeship/Code/code/datasets/model.csv')
 pdata <- pdata.frame(df, index=c("prov","year"))
 
 
-# CAPITALS
-df_cap <- read.csv('C:/Users/HP/Desktop/Traineeship/Code/code/datasets/model_capital.csv')
-
-pdata_cap <- pdata.frame(df_cap, index=c("mun_istat","year"))
-
-
 ############################################
 
 
 # CONTROL TESTS
 
 
-# UNIT-ROOT TESTS - PROVINCE
+# UNIT-ROOT TESTS - BUY MAX
 # Levin-Lin-Chu -  
 # The test procedures are designed to evaluate the null hypothesis that each individual in the panel 
 # has integrated time series versus the alternative hypothesis that all individuals time series are stationary.
@@ -61,13 +55,13 @@ purtest(
 )
 
 
-# UNIT-ROOT TESTS - CAPITALS
+# UNIT-ROOT TESTS - BUY MIN
 # Levin-Lin-Chu -  
 # The test procedures are designed to evaluate the null hypothesis that each individual in the panel 
 # has integrated time series versus the alternative hypothesis that all individuals time series are stationary.
 
 purtest(
-  pdata_cap$log_buy_max,
+  pdata$log_prov_buy_min_wgt,
   test = "levinlin",
   exo = "intercept",
   lags = 1
@@ -77,7 +71,7 @@ purtest(
 # It also allows for some (but not all) of the individual series to have unit roots under the alternative hypothesis.
 # H1: a satisfactory number (stationary/unit root = non zero) of individual processes is stationary 
 purtest(
-  pdata_cap$log_buy_max,
+  pdata$log_prov_buy_min_wgt,
   test = "ips",
   exo = "intercept",
   lags = 1
@@ -87,12 +81,11 @@ purtest(
 # The idea behind this test is to break up the hypothesis H0 : ri à 0 for alli, i à 1, 2, . . . , N into a set of 
 # sub-hypotheses H0i: ri à 0 and noting thatH0 is wrong if and only if any of its components H0i is wrong.
 purtest(
-  pdata_cap$log_buy_max,
+  pdata$log_prov_buy_min_wgt,
   test = "madwu",
   exo = "intercept",
   lags = 1
 )
-
 
 # VIF - MAIN MODEL
 vif <- plm(
@@ -100,6 +93,7 @@ vif <- plm(
     log_tourism_index_rnk +
     log_prov_median_income_wgt +
     log_prov_population +
+    log_reg_age_avg +
     log_prov_immigration +
     log_prov_unemployment +
     log_real_gdp +
@@ -118,9 +112,10 @@ vif <- plm(
     log_prov_ratio_tot_beds +
     log_prov_ratio_tot_nights +
     log_prov_ratio_str_houses +
-    log_prov_median_income_wgt +
     log_prov_population +
+    log_reg_age_avg +
     log_prov_immigration +
+    log_prov_median_income_wgt +
     log_prov_unemployment +
     log_real_gdp +
     log_interest_rate,
@@ -136,15 +131,15 @@ vif(vif)
 
 # OLS FIXED-EFFECT
 
-
-# PROVINCE FE 
-fe_model <- plm(
-  log_prov_buy_max_wgt ~
-    #lag(log_prov_buy_max_wgt, 1) +
+# PROVINCE FE (rnk) - min
+fe_model_rnk_min <- plm(
+  log_prov_buy_min_wgt ~
     log_tourism_index_rnk +
-    log_prov_median_income_wgt +
     log_prov_population +
+    log_reg_age_avg +
     log_prov_immigration +
+    log_prov_median_income_wgt +
+    log_prov_unemployment +
     log_real_gdp +
     log_interest_rate,
   data = pdata,
@@ -153,26 +148,112 @@ fe_model <- plm(
   effect = "individual"
 )
 
-summary(fe_model)
+summary(fe_model_rnk_min)
 
-# CAPITALS FE 
-fe_model_cap <- plm(
-  log_buy_max ~
-    #lag(log_buy_max, 1) +
-    log_tourism_index_vdw +
-    log_median_income +
-    log_population +
+# PROVINCE FE (rnk) - max 
+fe_model_rnk_max <- plm(
+  log_prov_buy_max_wgt ~
+    log_tourism_index_rnk +
+    log_prov_population +
+    log_reg_age_avg +
     log_prov_immigration +
+    log_prov_median_income_wgt +
+    log_prov_unemployment +
     log_real_gdp +
     log_interest_rate,
-  data = pdata_cap,
-  index = c("mun_istat", "year"),
+  data = pdata,
+  index = c("prov", "year"),
   model = "within",
   effect = "individual"
 )
 
-summary(fe_model_cap)
+summary(fe_model_rnk_max)
 
+###########################################################################
+
+# PROVINCE FE (z) - min
+fe_model_z_min <- plm(
+  log_prov_buy_min_wgt ~
+    log_tourism_index_z +
+    log_prov_population +
+    log_reg_age_avg +
+    log_prov_immigration +
+    log_prov_median_income_wgt +
+    log_prov_unemployment +
+    log_real_gdp +
+    log_interest_rate,
+  data = pdata,
+  index = c("prov", "year"),
+  model = "within",
+  effect = "individual"
+)
+
+summary(fe_model_z_min)
+
+# PROVINCE FE (z) - max 
+fe_model_z_max <- plm(
+  log_prov_buy_max_wgt ~
+    log_tourism_index_z +
+    log_prov_population +
+    log_reg_age_avg +
+    log_prov_immigration +
+    log_prov_median_income_wgt +
+    log_prov_unemployment +
+    log_real_gdp +
+    log_interest_rate,
+  data = pdata,
+  index = c("prov", "year"),
+  model = "within",
+  effect = "individual"
+)
+
+summary(fe_model_z_max)
+
+#######################################################################
+
+
+# PROVINCE FE (no index) - min
+fe_model_no_min <- plm(
+  log_prov_buy_min_wgt ~
+    log_prov_ratio_tot_nights +
+    log_prov_ratio_str_houses +
+    log_prov_population +
+    log_reg_age_avg +
+    log_prov_immigration +
+    log_prov_median_income_wgt +
+    log_prov_unemployment +
+    log_real_gdp +
+    log_interest_rate,
+  data = pdata,
+  index = c("prov", "year"),
+  model = "within",
+  effect = "individual"
+)
+
+summary(fe_model_no_min)
+
+# PROVINCE FE (no index) - max 
+fe_model_no_max <- plm(
+  log_prov_buy_max_wgt ~
+    log_prov_ratio_tot_nights +
+    log_prov_ratio_str_houses +
+    log_prov_population +
+    log_reg_age_avg +
+    log_prov_immigration +
+    log_prov_median_income_wgt +
+    log_prov_unemployment +
+    log_real_gdp +
+    log_interest_rate,
+  data = pdata,
+  index = c("prov", "year"),
+  model = "within",
+  effect = "individual"
+)
+
+summary(fe_model_no_max)
+
+
+##############################################################################
 
 # measure persistency
 
@@ -190,24 +271,25 @@ summary(fe_ar1)
 
 ##########################################################################################################
 
-# SYSTEM-GMM LEVEL
+# SYSTEM-GMM - rnk
 
-# PROVINCE - system-GMM (LEVEL)
-sys_model <- pgmm(
+# PROVINCE - system-GMM - rnk - min
+sys_model_rnk_min <- pgmm(
   log_prov_buy_min_wgt ~ 
     lag(log_prov_buy_min_wgt, 1) +
     log_tourism_index_rnk +
-    log_prov_median_income_wgt +
     log_prov_population +
+    log_reg_age_avg +
     log_prov_immigration +
+    log_prov_median_income_wgt +
     log_prov_unemployment +
     log_real_gdp +
     log_interest_rate |
     lag(log_prov_buy_min_wgt, 2:10) +
     lag(log_tourism_index_rnk, 2:10) +
-    lag(log_prov_median_income_wgt, 2:10) +
     lag(log_prov_population, 2:10) +
     lag(log_prov_immigration, 2:10) +
+    lag(log_prov_median_income_wgt, 2:10) +
     lag(log_prov_unemployment, 2:10) +
     lag(log_real_gdp, 2:10) +
     lag(log_interest_rate, 2:10),
@@ -219,29 +301,127 @@ sys_model <- pgmm(
   index = c("prov", "year")
 )
 
-summary(sys_model, robust = TRUE, time.dummies = FALSE)
+summary(sys_model_rnk_min, robust = TRUE, time.dummies = FALSE)
 
 
-# PROVINCE - system-GMM (LEVEL) - NO INDEX
-sys_model <- pgmm(
+# PROVINCE - system-GMM - rnk - max
+sys_model_rnk_max <- pgmm(
   log_prov_buy_max_wgt ~ 
+    lag(log_prov_buy_max_wgt, 1) +
+    log_tourism_index_rnk +
+    log_prov_population +
+    log_reg_age_avg +
+    log_prov_immigration +
+    log_prov_median_income_wgt +
+    log_prov_unemployment +
+    log_real_gdp +
+    log_interest_rate |
+    lag(log_prov_buy_max_wgt, 2:10) +
+    lag(log_tourism_index_rnk, 2:10) +
+    lag(log_prov_population, 2:10) +
+    lag(log_prov_immigration, 2:10) +
+    lag(log_prov_median_income_wgt, 2:10) +
+    lag(log_prov_unemployment, 2:10) +
+    lag(log_real_gdp, 2:10) +
+    lag(log_interest_rate, 2:10),
+  data = pdata,
+  effect = "individual",
+  model = "twostep",
+  collapse = TRUE,
+  transformation = "ld", # ld for system-GMM and d for difference-GMM
+  index = c("prov", "year")
+)
+
+summary(sys_model_rnk_max, robust = TRUE, time.dummies = FALSE)
+
+
+#######################################################################
+
+# SYSTEM-GMM - z
+
+# PROVINCE - system-GMM - z - min
+sys_model_z_min <- pgmm(
+  log_prov_buy_min_wgt ~ 
     lag(log_prov_buy_min_wgt, 1) +
-    #log_prov_ratio_tot_beds +
+    log_tourism_index_z +
+    log_prov_population +
+    log_reg_age_avg +
+    log_prov_immigration +
+    log_prov_median_income_wgt +
+    log_prov_unemployment +
+    log_real_gdp +
+    log_interest_rate |
+    lag(log_prov_buy_min_wgt, 2:10) +
+    lag(log_tourism_index_z, 2:10) +
+    lag(log_prov_population, 2:10) +
+    lag(log_prov_immigration, 2:10) +
+    lag(log_prov_median_income_wgt, 2:10) +
+    lag(log_prov_unemployment, 2:10) +
+    lag(log_real_gdp, 2:10) +
+    lag(log_interest_rate, 2:10),
+  data = pdata,
+  effect = "individual",
+  model = "twostep",
+  collapse = TRUE,
+  transformation = "ld", # ld for system-GMM and d for difference-GMM
+  index = c("prov", "year")
+)
+
+summary(sys_model_z_min, robust = TRUE, time.dummies = FALSE)
+
+
+# PROVINCE - system-GMM - z - max
+sys_model_z_max <- pgmm(
+  log_prov_buy_max_wgt ~ 
+    lag(log_prov_buy_max_wgt, 1) +
+    log_tourism_index_z +
+    log_prov_population +
+    log_reg_age_avg +
+    log_prov_immigration +
+    log_prov_median_income_wgt +
+    log_prov_unemployment +
+    log_real_gdp +
+    log_interest_rate |
+    lag(log_prov_buy_max_wgt, 2:10) +
+    lag(log_tourism_index_z, 2:10) +
+    lag(log_prov_population, 2:10) +
+    lag(log_prov_immigration, 2:10) +
+    lag(log_prov_median_income_wgt, 2:10) +
+    lag(log_prov_unemployment, 2:10) +
+    lag(log_real_gdp, 2:10) +
+    lag(log_interest_rate, 2:10),
+  data = pdata,
+  effect = "individual",
+  model = "twostep",
+  collapse = TRUE,
+  transformation = "ld", # ld for system-GMM and d for difference-GMM
+  index = c("prov", "year")
+)
+
+summary(sys_model_z_max, robust = TRUE, time.dummies = FALSE)
+
+
+####################################################################à
+
+# PROVINCE - system-GMM (LEVEL) - NO INDEX - min
+sys_model_no_min <- pgmm(
+  log_prov_buy_min_wgt ~ 
+    lag(log_prov_buy_min_wgt, 1) +
     log_prov_ratio_tot_nights +
     log_prov_ratio_str_houses +
-    log_prov_median_income_wgt +
     log_prov_population +
+    log_reg_age_avg +
     log_prov_immigration +
+    log_prov_median_income_wgt +
     log_prov_unemployment +
     log_real_gdp +
     log_interest_rate |
     lag(log_prov_buy_min_wgt, 2:10) +
-    #lag(log_prov_ratio_tot_beds, 2:10) +
     lag(log_prov_ratio_tot_nights, 2:10) +
     lag(log_prov_ratio_str_houses, 2:10) +
-    lag(log_prov_median_income_wgt, 2:10) +
     lag(log_prov_population, 2:10) +
     lag(log_prov_immigration, 2:10) +
+    lag(log_prov_median_income_wgt, 2:10) +
     lag(log_prov_unemployment, 2:10) +
     lag(log_real_gdp, 2:10) +
     lag(log_interest_rate, 2:10),
@@ -253,104 +433,67 @@ sys_model <- pgmm(
   index = c("prov", "year")
 )
 
-summary(sys_model, robust = TRUE, time.dummies = FALSE)
+summary(sys_model_no_min, robust = TRUE, time.dummies = FALSE)
 
 
-# CAPITALS - system-GMM (LEVEL)
-sys_model_cap <- pgmm(
-  log_buy_max ~ 
-    lag(log_buy_max, 1) +
-    log_tourism_index_rnk +
-    log_median_income +
-    log_population +
-    log_prov_immigration +
-    log_prov_unemployment +
+# PROVINCE - system-GMM (LEVEL) - NO INDEX - max
+sys_model_no_max <- pgmm(
+  log_prov_buy_max_wgt ~ 
+    lag(log_prov_buy_max_wgt, 1) +
+    log_prov_ratio_tot_nights +
+    log_prov_ratio_str_houses +
+    log_prov_population +
     log_reg_age_avg +
-    log_real_gdp +
-    log_interest_rate |
-    lag(log_buy_max, 2:10) +
-    lag(log_tourism_index_rnk, 2:10) +
-    lag(log_median_income, 2:10) +
-    lag(log_population, 2:10) +
-    lag(log_prov_immigration, 2:10) +
-    lag(log_prov_unemployment, 2:10) +
-    lag(log_reg_age_avg, 2:10) +
-    lag(log_real_gdp, 2:10) +
-    lag(log_interest_rate, 2:10),
-  data = pdata_cap,
-  effect = "individual",
-  model = "twostep",
-  collapse = TRUE,
-  transformation = "ld", # ld for system-GMM and d for difference-GMM
-  index = c("mun_istat", "year")
-)
-
-summary(sys_model_cap, robust = TRUE, time.dummies = FALSE)
-
-
-# CAPITALS - system-GMM (LEVEL) - NO INDEX
-sys_model_cap <- pgmm(
-  log_buy_max ~ 
-    lag(log_buy_max, 1) +
-    log_ratio_tot_beds +
-    log_ratio_tot_nights +
-    log_ratio_str_houses +
-    log_median_income +
-    log_population +
     log_prov_immigration +
+    log_prov_median_income_wgt +
     log_prov_unemployment +
     log_real_gdp +
     log_interest_rate |
-    lag(log_buy_max, 2:10) +
-    lag(log_ratio_tot_beds, 2:10) +
-    lag(log_ratio_tot_nights, 2:10) +
-    lag(log_ratio_str_houses, 2:10) +
-    lag(log_median_income, 2:10) +
-    lag(log_population, 2:10) +
+    lag(log_prov_buy_max_wgt, 2:10) +
+    lag(log_prov_ratio_tot_nights, 2:10) +
+    lag(log_prov_ratio_str_houses, 2:10) +
+    lag(log_prov_population, 2:10) +
     lag(log_prov_immigration, 2:10) +
+    lag(log_prov_median_income_wgt, 2:10) +
     lag(log_prov_unemployment, 2:10) +
     lag(log_real_gdp, 2:10) +
     lag(log_interest_rate, 2:10),
-  data = pdata_cap,
+  data = pdata,
   effect = "individual",
   model = "twostep",
   collapse = TRUE,
   transformation = "ld", # ld for system-GMM and d for difference-GMM
-  index = c("mun_istat", "year")
+  index = c("prov", "year")
 )
 
-summary(sys_model_cap, robust = TRUE, time.dummies = FALSE)
-
+summary(sys_model_no_max, robust = TRUE, time.dummies = FALSE)
 
 ##################################################################################################
 
 # SYSTEM-GMM GROWTH
 
-# PROVINCE GROWTH RATES
-growth_data <- na.omit(pdata)
-
-pdata1 <- pdata.frame(growth_data, index=c("prov","year"))
-
-# PROVINCE - system-GMM (GROWTH)
-sys_model_growth <- pgmm(
-  d_log_prov_buy_max_wgt ~ 
-    lag(d_log_prov_buy_max_wgt, 1) +
-    d_log_tourism_index_rnk +
-    d_log_prov_median_income_wgt +
-    d_log_prov_population +
-    d_log_prov_immigration +
-    d_log_prov_unemployment +
-    d_log_real_gdp +
-    d_log_interest_rate |
-    lag(d_log_prov_buy_max_wgt, 2:10) +
-    lag(d_log_tourism_index_rnk, 2:10) +
-    lag(d_log_prov_median_income_wgt, 2:10) +
-    lag(d_log_prov_population, 2:10) +
-    lag(d_log_prov_immigration, 2:10) +
-    lag(d_log_prov_unemployment, 2:10) +
-    lag(d_log_real_gdp, 2:10) +
-    lag(d_log_interest_rate, 2:10),
-  data = pdata1,
+# PROVINCE - system-GMM - z - max
+sys_model_z_max <- pgmm(
+  log_prov_buy_max_wgt ~ 
+    lag(log_prov_buy_max_wgt, 1) +
+    log_tourism_index_z +
+    factor(location)*log_tourism_index_z +
+    log_prov_population +
+    log_reg_age_avg +
+    log_prov_immigration +
+    log_prov_median_income_wgt +
+    log_prov_unemployment +
+    log_real_gdp +
+    log_interest_rate |
+    lag(log_prov_buy_max_wgt, 2:10) +
+    lag(log_tourism_index_z, 2:10) +
+    lag(log_prov_population, 2:10) +
+    lag(log_prov_immigration, 2:10) +
+    lag(log_prov_median_income_wgt, 2:10) +
+    lag(log_prov_unemployment, 2:10) +
+    lag(log_real_gdp, 2:10) +
+    lag(log_interest_rate, 2:10),
+  data = pdata,
   effect = "individual",
   model = "twostep",
   collapse = TRUE,
@@ -358,103 +501,5 @@ sys_model_growth <- pgmm(
   index = c("prov", "year")
 )
 
-summary(sys_model_growth, robust = TRUE, time.dummies = FALSE)
 
-
-# PROVINCE - system-GMM (GROWTH) - NO INDEX
-sys_model_growth_no <- pgmm(
-  d_log_prov_buy_max_wgt ~ 
-    lag(d_log_prov_buy_max_wgt, 1) +
-    d_log_prov_ratio_tot_beds +
-    d_log_prov_ratio_tot_nights +
-    d_log_prov_ratio_str_houses +
-    d_log_prov_median_income_wgt +
-    d_log_prov_population +
-    d_log_prov_immigration +
-    d_log_prov_unemployment +
-    d_log_real_gdp +
-    d_log_interest_rate |
-    lag(d_log_prov_buy_max_wgt, 2:10) +
-    lag(d_log_prov_ratio_tot_beds, 2:10) +
-    lag(d_log_prov_ratio_tot_nights, 2:10) +
-    lag(d_log_prov_ratio_str_houses, 2:10) +
-    lag(d_log_prov_median_income_wgt, 2:10) +
-    lag(d_log_prov_population, 2:10) +
-    lag(d_log_prov_immigration, 2:10) +
-    lag(d_log_prov_unemployment, 2:10) +
-    lag(d_log_real_gdp, 2:10) +
-    lag(d_log_interest_rate, 2:10),
-  data = pdata1,
-  effect = "individual",
-  model = "twostep",
-  collapse = TRUE,
-  transformation = "ld", # ld for system-GMM and d for difference-GMM
-  index = c("prov", "year")
-)
-
-summary(sys_model_growth_no, robust = TRUE, time.dummies = FALSE)
-
-
-# CAPITALS GROWTH RATES
-growth_data_cap <- na.omit(pdata_cap)
-
-pdata1_cap <- pdata.frame(growth_data_cap, index=c("mun_istat","year"))
-
-# CAPITALS - system-GMM (GROWTH)
-sys_model_growth_cap <- pgmm(
-  d_log_buy_max ~ 
-    lag(d_log_buy_max, 1) +
-    d_log_tourism_index_vdw +
-    d_log_median_income +
-    d_log_population +
-    d_log_prov_immigration +
-    d_log_real_gdp +
-    d_log_interest_rate |
-    lag(d_log_buy_max, 2:10) +
-    lag(d_log_tourism_index_vdw, 2:10) +
-    lag(d_log_median_income, 2:10) +
-    lag(d_log_population, 2:10) +
-    lag(d_log_prov_immigration, 2:10) +
-    lag(d_log_real_gdp, 2:10) +
-    lag(d_log_interest_rate, 2:10),
-  data = pdata1_cap,
-  effect = "individual",
-  model = "twostep",
-  collapse = TRUE,
-  transformation = "ld", # ld for system-GMM and d for difference-GMM
-  index = c("mun_istat", "year")
-)
-
-summary(sys_model_growth_cap, robust = TRUE, time.dummies = FALSE)
-
-
-# CAPITALS - system-GMM (GROWTH) - NO INDEX
-sys_model_growth_cap_no <- pgmm(
-  d_log_buy_max ~ 
-    lag(d_log_buy_max, 1) +
-    d_log_ratio_tot_beds +
-    d_log_ratio_tot_nights +
-    d_log_ratio_str_houses +
-    d_log_median_income +
-    d_log_population +
-    d_log_prov_immigration +
-    d_log_real_gdp +
-    d_log_interest_rate |
-    lag(d_log_buy_max, 2:10) +
-    lag(d_log_ratio_tot_beds, 2:10) +
-    lag(d_log_ratio_tot_nights, 2:10) +
-    lag(d_log_ratio_str_houses, 2:10) +
-    lag(d_log_median_income, 2:10) +
-    lag(d_log_population, 2:10) +
-    lag(d_log_prov_immigration, 2:10) +
-    lag(d_log_real_gdp, 2:10) +
-    lag(d_log_interest_rate, 2:10),
-  data = pdata1_cap,
-  effect = "individual",
-  model = "twostep",
-  collapse = TRUE,
-  transformation = "ld", # ld for system-GMM and d for difference-GMM
-  index = c("mun_istat", "year")
-)
-
-summary(sys_model_growth_cap_no, robust = TRUE, time.dummies = FALSE)
+summary(sys_model_z_max, robust = TRUE, time.dummies = FALSE)
