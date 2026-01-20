@@ -5,6 +5,7 @@ venv/
 datasets/
 __pycache__/
 documents/
+paper/
 
 *.pyc
 notes.md

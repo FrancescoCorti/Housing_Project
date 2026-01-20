@@ -470,29 +470,31 @@ summary(sys_model_no_max, robust = TRUE, time.dummies = FALSE)
 
 ##################################################################################################
 
-# SYSTEM-GMM GROWTH
+# SYSTEM-GMM COVID
 
-# PROVINCE - system-GMM - z - max
-sys_model_z_max <- pgmm(
+# PROVINCE - system-GMM - rnk - max - covid
+sys_model_rnk_max_covid <- pgmm(
   log_prov_buy_max_wgt ~ 
     lag(log_prov_buy_max_wgt, 1) +
-    log_tourism_index_z +
-    factor(location)*log_tourism_index_z +
+    log_tourism_index_rnk +
     log_prov_population +
     log_reg_age_avg +
     log_prov_immigration +
     log_prov_median_income_wgt +
     log_prov_unemployment +
     log_real_gdp +
-    log_interest_rate |
+    log_interest_rate +
+    covid +
+    covid:tourism_index_rnk |
     lag(log_prov_buy_max_wgt, 2:10) +
-    lag(log_tourism_index_z, 2:10) +
+    lag(log_tourism_index_rnk, 2:10) +
     lag(log_prov_population, 2:10) +
     lag(log_prov_immigration, 2:10) +
     lag(log_prov_median_income_wgt, 2:10) +
     lag(log_prov_unemployment, 2:10) +
     lag(log_real_gdp, 2:10) +
-    lag(log_interest_rate, 2:10),
+    lag(log_interest_rate, 2:10) +
+    lag(covid:tourism_index_rnk, 2:10),
   data = pdata,
   effect = "individual",
   model = "twostep",
@@ -501,5 +503,191 @@ sys_model_z_max <- pgmm(
   index = c("prov", "year")
 )
 
+summary(sys_model_rnk_max_covid, robust = TRUE, time.dummies = FALSE)
 
-summary(sys_model_z_max, robust = TRUE, time.dummies = FALSE)
+
+# PROVINCE - system-GMM - z - max - covid
+sys_model_z_max_covid <- pgmm(
+  log_prov_buy_max_wgt ~ 
+    lag(log_prov_buy_max_wgt, 1) +
+    log_tourism_index_z +
+    log_prov_population +
+    log_reg_age_avg +
+    log_prov_immigration +
+    log_prov_median_income_wgt +
+    log_prov_unemployment +
+    log_real_gdp +
+    log_interest_rate +
+    covid +
+    covid:tourism_index_z |
+    lag(log_prov_buy_max_wgt, 2:10) +
+    lag(log_tourism_index_z, 2:10) +
+    lag(log_prov_population, 2:10) +
+    lag(log_prov_immigration, 2:10) +
+    lag(log_prov_median_income_wgt, 2:10) +
+    lag(log_prov_unemployment, 2:10) +
+    lag(log_real_gdp, 2:10) +
+    lag(log_interest_rate, 2:10) +
+    lag(covid:tourism_index_z, 2:10),
+  data = pdata,
+  effect = "individual",
+  model = "twostep",
+  collapse = TRUE,
+  transformation = "ld", # ld for system-GMM and d for difference-GMM
+  index = c("prov", "year")
+)
+
+summary(sys_model_z_max_covid, robust = TRUE, time.dummies = FALSE)
+
+
+
+# PROVINCE - system-GMM (LEVEL) - NO INDEX - max - covid
+sys_model_no_max_covid <- pgmm(
+  log_prov_buy_max_wgt ~ 
+    lag(log_prov_buy_max_wgt, 1) +
+    log_prov_ratio_tot_nights +
+    log_prov_ratio_str_houses +
+    log_prov_population +
+    log_reg_age_avg +
+    log_prov_immigration +
+    log_prov_median_income_wgt +
+    log_prov_unemployment +
+    log_real_gdp +
+    log_interest_rate +
+    covid +
+    covid:log_prov_ratio_tot_nights +
+    covid:log_prov_ratio_str_houses |
+    lag(log_prov_buy_max_wgt, 2:10) +
+    lag(log_prov_ratio_tot_nights, 2:10) +
+    lag(log_prov_ratio_str_houses, 2:10) +
+    lag(log_prov_population, 2:10) +
+    lag(log_prov_immigration, 2:10) +
+    lag(log_prov_median_income_wgt, 2:10) +
+    lag(log_prov_unemployment, 2:10) +
+    lag(log_real_gdp, 2:10) +
+    lag(log_interest_rate, 2:10) +
+    lag(covid:log_prov_ratio_tot_nights, 2:10) +
+    lag(covid:log_prov_ratio_str_houses, 2:10),
+  data = pdata,
+  effect = "individual",
+  model = "twostep",
+  collapse = TRUE,
+  transformation = "ld", # ld for system-GMM and d for difference-GMM
+  index = c("prov", "year")
+)
+
+summary(sys_model_no_max_covid, robust = TRUE, time.dummies = FALSE)
+
+
+
+
+
+# SYSTEM-GMM COVID - MIN
+
+# PROVINCE - system-GMM - rnk - min - covid
+sys_model_rnk_min_covid <- pgmm(
+  log_prov_buy_min_wgt ~ 
+    lag(log_prov_buy_min_wgt, 1) +
+    log_tourism_index_rnk +
+    log_prov_population +
+    log_reg_age_avg +
+    log_prov_immigration +
+    log_prov_median_income_wgt +
+    log_prov_unemployment +
+    log_real_gdp +
+    log_interest_rate +
+    covid +
+    covid:tourism_index_rnk |
+    lag(log_prov_buy_min_wgt, 2:10) +
+    lag(log_tourism_index_rnk, 2:10) +
+    lag(log_prov_population, 2:10) +
+    lag(log_prov_immigration, 2:10) +
+    lag(log_prov_median_income_wgt, 2:10) +
+    lag(log_prov_unemployment, 2:10) +
+    lag(log_real_gdp, 2:10) +
+    lag(log_interest_rate, 2:10) +
+    lag(covid:tourism_index_rnk, 2:10),
+  data = pdata,
+  effect = "individual",
+  model = "twostep",
+  collapse = TRUE,
+  transformation = "ld", # ld for system-GMM and d for difference-GMM
+  index = c("prov", "year")
+)
+
+summary(sys_model_rnk_min_covid, robust = TRUE, time.dummies = FALSE)
+
+
+# PROVINCE - system-GMM - z - min - covid
+sys_model_z_min_covid <- pgmm(
+  log_prov_buy_min_wgt ~ 
+    lag(log_prov_buy_min_wgt, 1) +
+    log_tourism_index_z +
+    log_prov_population +
+    log_reg_age_avg +
+    log_prov_immigration +
+    log_prov_median_income_wgt +
+    log_prov_unemployment +
+    log_real_gdp +
+    log_interest_rate +
+    covid +
+    covid:tourism_index_z |
+    lag(log_prov_buy_min_wgt, 2:10) +
+    lag(log_tourism_index_z, 2:10) +
+    lag(log_prov_population, 2:10) +
+    lag(log_prov_immigration, 2:10) +
+    lag(log_prov_median_income_wgt, 2:10) +
+    lag(log_prov_unemployment, 2:10) +
+    lag(log_real_gdp, 2:10) +
+    lag(log_interest_rate, 2:10) +
+    lag(covid:tourism_index_z, 2:10),
+  data = pdata,
+  effect = "individual",
+  model = "twostep",
+  collapse = TRUE,
+  transformation = "ld", # ld for system-GMM and d for difference-GMM
+  index = c("prov", "year")
+)
+
+summary(sys_model_z_min_covid, robust = TRUE, time.dummies = FALSE)
+
+
+
+# PROVINCE - system-GMM (LEVEL) - NO INDEX - min - covid
+sys_model_no_min_covid <- pgmm(
+  log_prov_buy_min_wgt ~ 
+    lag(log_prov_buy_min_wgt, 1) +
+    log_prov_ratio_tot_nights +
+    log_prov_ratio_str_houses +
+    log_prov_population +
+    log_reg_age_avg +
+    log_prov_immigration +
+    log_prov_median_income_wgt +
+    log_prov_unemployment +
+    log_real_gdp +
+    log_interest_rate +
+    covid +
+    covid:log_prov_ratio_tot_nights +
+    covid:log_prov_ratio_str_houses |
+    lag(log_prov_buy_min_wgt, 2:10) +
+    lag(log_prov_ratio_tot_nights, 2:10) +
+    lag(log_prov_ratio_str_houses, 2:10) +
+    lag(log_prov_population, 2:10) +
+    lag(log_prov_immigration, 2:10) +
+    lag(log_prov_median_income_wgt, 2:10) +
+    lag(log_prov_unemployment, 2:10) +
+    lag(log_real_gdp, 2:10) +
+    lag(log_interest_rate, 2:10) +
+    lag(covid:log_prov_ratio_tot_nights, 2:10) +
+    lag(covid:log_prov_ratio_str_houses, 2:10),
+  data = pdata,
+  effect = "individual",
+  model = "twostep",
+  collapse = TRUE,
+  transformation = "ld", # ld for system-GMM and d for difference-GMM
+  index = c("prov", "year")
+)
+
+summary(sys_model_no_min_covid, robust = TRUE, time.dummies = FALSE)
+
+
