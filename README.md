@@ -1,4 +1,4 @@
-*The Long-Term Effects of Tourism on Housing Prices: Evidence from Italy*
+**The Long-Term Effects of Tourism on Housing Prices: Evidence from Italy**
 
 Tourism is a complex economic phenomenon, which has to be investigated due to its reshaping effects on local communities. In this reseatch, I focus on the relationship between tourism and housing prices in Italian provinces for the period between 2014 and 2024. The main findings indicate a positive and statistically significant effect of tourism on provincial housing prices.
 
