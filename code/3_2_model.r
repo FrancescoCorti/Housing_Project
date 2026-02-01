@@ -11,6 +11,8 @@ library(car)
 library(sf)
 library(spdep)
 library(spatialreg)
+library(splm)
+
 
 ############################################
 
@@ -1039,10 +1041,31 @@ W_q <- nb2listw(nb_q, style = "W", zero.policy = TRUE)
 # representative year
 df_2019 <- pdata %>% filter(year == 2019)
 
-# Moran I test
+# Moran I test - buy
 moran.test(df_2019$log_prov_buy_avg_wgt_de,
            listw = W_q,
            zero.policy = TRUE)
+
+# Moran I test - z
+moran.test(df_2019$log_tourism_index_z,
+           listw = W_q,
+           zero.policy = TRUE)
+
+# Moran I test - rnk
+moran.test(df_2019$log_tourism_index_rnk,
+           listw = W_q,
+           zero.policy = TRUE)
+
+# Moran I test - nights
+moran.test(df_2019$log_prov_ratio_tot_nights,
+           listw = W_q,
+           zero.policy = TRUE)
+
+# Moran I test - str
+moran.test(df_2019$log_prov_ratio_str_houses,
+           listw = W_q,
+           zero.policy = TRUE)
+
 
 sp_2019 <- pdata %>%
   filter(year == 2019) %>%
@@ -1051,7 +1074,7 @@ sp_2019 <- pdata %>%
 nrow(sp_2019)
 length(W_q$neighbours)
 
-
+##########################################################################
 # spatial lag model - rnk
 sar_model_rnk <- lagsarlm(
   log_prov_buy_avg_wgt_de ~
@@ -1067,6 +1090,30 @@ sar_model_rnk <- lagsarlm(
 
 summary(sar_model_rnk)
 
+impacts_sar_rnk <- impacts(
+  sar_model_rnk,
+  listw = W_q,
+  R = 1000
+)
+
+summary(impacts_sar_rnk, zstats = TRUE)
+
+sdm_null <- lagsarlm(
+  log_prov_buy_avg_wgt_de ~ 1,
+  data = sp_2019,
+  listw = W_q,
+  zero.policy = TRUE,
+  method = "eigen"
+)
+
+R2_LR <- 1 - exp(
+  (2 / nrow(sp_2019)) *
+  (logLik(sdm_null) - logLik(sar_model_rnk))
+)
+R2_LR
+
+
+
 # spatial lag model - z
 sar_model_z <- lagsarlm(
   log_prov_buy_avg_wgt_de ~
@@ -1081,6 +1128,20 @@ sar_model_z <- lagsarlm(
 )
 
 summary(sar_model_z)
+
+impacts_sar_z <- impacts(
+  sar_model_z,
+  listw = W_q,
+  R = 1000
+)
+
+summary(impacts_sar_z, zstats = TRUE)
+
+R2_LR <- 1 - exp(
+  (2 / nrow(sp_2019)) *
+  (logLik(sdm_null) - logLik(sar_model_z))
+)
+R2_LR
 
 
 # spatial lag model - no
@@ -1099,134 +1160,188 @@ sar_model_no <- lagsarlm(
 
 summary(sar_model_no)
 
-############################################################
-
-# spatial spillover of tourism - rnk
-sp_df_rnk <- pdata %>%
-  select(prov, year,
-         log_prov_buy_avg_wgt_de,
-         log_tourism_index_rnk,
-         log_prov_population,
-         log_prov_median_income_wgt,
-         log_prov_unemployment)
-
-
-sp_df_rnk <- sp_df_rnk %>%
-  group_by(year) %>%
-  mutate(W_tourism = lag.listw(W_q, log_tourism_index_rnk,
-                               zero.policy = TRUE)) %>%
-  ungroup()
-
-
-spill_model_rnk <- lm(
-  log_prov_buy_avg_wgt_de ~
-    log_tourism_index_rnk +
-    W_tourism +
-    log_prov_population +
-    log_prov_median_income_wgt +
-    log_prov_unemployment +
-    factor(year),
-  data = sp_df_rnk
+impacts_sar_no <- impacts(
+  sar_model_no,
+  listw = W_q,
+  R = 1000
 )
 
-summary(spill_model_rnk)
+summary(impacts_sar_no, zstats = TRUE)
 
+R2_LR <- 1 - exp(
+  (2 / nrow(sp_2019)) *
+  (logLik(sdm_null) - logLik(sar_model_no))
+)
+R2_LR
 
-
-# spatial spillover of tourism - z
-sp_df_z <- pdata %>%
-  select(prov, year,
-         log_prov_buy_avg_wgt_de,
-         log_tourism_index_z,
-         log_prov_population,
-         log_prov_median_income_wgt,
-         log_prov_unemployment)
-
-
-sp_df_z <- sp_df_z %>%
-  group_by(year) %>%
-  mutate(W_tourism = lag.listw(W_q, log_tourism_index_z,
-                               zero.policy = TRUE)) %>%
-  ungroup()
-
-
-spill_model_z <- lm(
+############################################################
+# spatial lag model - z
+sdm_z <- lagsarlm(
   log_prov_buy_avg_wgt_de ~
     log_tourism_index_z +
-    W_tourism +
     log_prov_population +
     log_prov_median_income_wgt +
-    log_prov_unemployment +
-    factor(year),
-  data = sp_df_z
+    log_prov_unemployment,
+  data = sp_2019,
+  listw = W_q,
+  Durbin = TRUE,
+  zero.policy = TRUE,
+  method = "eigen"
 )
 
-summary(spill_model_z)
+summary(sdm_z)
 
 
-# spatial spillover of tourism - nights
+impacts_sdm_z <- impacts(
+  sdm_z,
+  listw = W_q,
+  R = 1000
+)
 
-sp_df_nights <- pdata %>%
-  select(prov, year,
-         log_prov_buy_avg_wgt_de,
-         log_prov_ratio_tot_nights,
-         log_prov_population,
-         log_prov_median_income_wgt,
-         log_prov_unemployment)
+summary(impacts_sdm_z, zstats = TRUE)
 
-
-sp_df_nights <- sp_df_nights %>%
-  group_by(year) %>%
-  mutate(W_tourism = lag.listw(W_q, log_prov_ratio_tot_nights,
-                               zero.policy = TRUE)) %>%
-  ungroup()
+R2_LR <- 1 - exp(
+  (2 / nrow(sp_2019)) *
+  (logLik(sdm_null) - logLik(sdm_z))
+)
+R2_LR
 
 
-spill_model_nights <- lm(
+# spatial lag model - rnk
+sdm_rnk <- lagsarlm(
+  log_prov_buy_avg_wgt_de ~
+    log_tourism_index_rnk +
+    log_prov_population +
+    log_prov_median_income_wgt +
+    log_prov_unemployment,
+  data = sp_2019,
+  listw = W_q,
+  Durbin = TRUE,
+  zero.policy = TRUE,
+  method = "eigen"
+)
+
+summary(sdm_rnk)
+
+
+impacts_sdm_rnk <- impacts(
+  sdm_rnk,
+  listw = W_q,
+  R = 1000
+)
+
+summary(impacts_sdm_rnk, zstats = TRUE)
+
+
+R2_LR <- 1 - exp(
+  (2 / nrow(sp_2019)) *
+  (logLik(sdm_null) - logLik(sdm_rnk))
+)
+R2_LR
+
+
+# spatial lag model - no
+sdm_no <- lagsarlm(
   log_prov_buy_avg_wgt_de ~
     log_prov_ratio_tot_nights +
-    W_tourism +
-    log_prov_population +
-    log_prov_median_income_wgt +
-    log_prov_unemployment +
-    factor(year),
-  data = sp_df_nights
-)
-
-summary(spill_model_nights)
-
-
-
-# spatial spillover of tourism - str
-
-sp_df_str <- pdata %>%
-  select(prov, year,
-         log_prov_buy_avg_wgt_de,
-         log_prov_ratio_str_houses,
-         log_prov_population,
-         log_prov_median_income_wgt,
-         log_prov_unemployment)
-
-
-sp_df_str <- sp_df_str %>%
-  group_by(year) %>%
-  mutate(W_tourism = lag.listw(W_q, log_prov_ratio_str_houses,
-                               zero.policy = TRUE)) %>%
-  ungroup()
-
-
-spill_model_str <- lm(
-  log_prov_buy_avg_wgt_de ~
     log_prov_ratio_str_houses +
-    W_tourism +
     log_prov_population +
     log_prov_median_income_wgt +
-    log_prov_unemployment +
-    factor(year),
-  data = sp_df_str
+    log_prov_unemployment,
+  data = sp_2019,
+  listw = W_q,
+  Durbin = TRUE,
+  zero.policy = TRUE,
+  method = "eigen"
 )
 
-summary(spill_model_str)
+summary(sdm_no)
 
 
+impacts_sdm_no <- impacts(
+  sdm_no,
+  listw = W_q,
+  R = 1000
+)
 
+summary(impacts_sdm_no, zstats = TRUE)
+
+
+R2_LR <- 1 - exp(
+  (2 / nrow(sp_2019)) *
+  (logLik(sdm_null) - logLik(sdm_no))
+)
+R2_LR
+
+#############################################################
+
+# SAR - z - fe
+sar_z_fe <- spml(
+  log_prov_buy_avg_wgt_de ~
+    log_tourism_index_z +
+    log_prov_population +
+    log_prov_median_income_wgt +
+    log_prov_unemployment,
+  data = pdata,
+  listw = W_q,
+  model = "within",
+  lag = TRUE,
+  effect = "twoways"
+)
+
+summary(sar_z_fe)
+
+
+y <- sar_z_fe$model[, 1]
+y_hat <- sar_z_fe$fitted.values
+
+R2_within <- cor(y, y_hat)^2
+R2_within
+
+
+# SAR - rnk - fe
+sar_rnk_fe <- spml(
+  log_prov_buy_avg_wgt_de ~
+    log_tourism_index_rnk +
+    log_prov_population +
+    log_prov_median_income_wgt +
+    log_prov_unemployment,
+  data = pdata,
+  listw = W_q,
+  model = "within",
+  lag = TRUE,
+  effect = "twoways"
+)
+
+summary(sar_rnk_fe)
+
+
+y <- sar_rnk_fe$model[, 1]
+y_hat <- sar_rnk_fe$fitted.values
+
+R2_within <- cor(y, y_hat)^2
+R2_within
+
+
+# SAR - no - fe
+sar_no_fe <- spml(
+  log_prov_buy_avg_wgt_de ~
+    log_prov_ratio_tot_nights +
+    log_prov_ratio_str_houses +
+    log_prov_population +
+    log_prov_median_income_wgt +
+    log_prov_unemployment,
+  data = pdata,
+  listw = W_q,
+  model = "within",
+  lag = TRUE,
+  effect = "twoways"
+)
+
+summary(sar_no_fe)
+
+y <- sar_no_fe$model[, 1]
+y_hat <- sar_no_fe$fitted.values
+
+R2_within <- cor(y, y_hat)^2
+R2_within
