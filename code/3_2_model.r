@@ -1,18 +1,15 @@
 library(plm)
 library(lmtest)
 library(dplyr)
-library(ivreg)
 library(modelsummary)
 library(tibble)
 library(car)
 
-
-
+# spatial models
 library(sf)
 library(spdep)
 library(spatialreg)
 library(splm)
-
 
 ############################################
 
@@ -137,7 +134,8 @@ vif <- plm(
     log_prov_immigration +
     log_prov_unemployment +
     log_real_gdp +
-    log_interest_rate,,
+    log_interest_rate +
+    covid_all,
   data = pdata,
   index = c("prov", "year"),
   model = "pooling"
@@ -158,7 +156,8 @@ vif <- plm(
     log_prov_median_income_wgt +
     log_prov_unemployment +
     log_real_gdp +
-    log_interest_rate,
+    log_interest_rate +
+    covid_all,
     data = pdata,
   index = c("prov", "year"),
   model = "pooling"
@@ -253,22 +252,6 @@ fe_model_z_avg_nat <- plm(
 
 summary(fe_model_z_avg_nat)
 
-##############################################################################
-
-# measure persistency
-
-pool_ar1 <- plm(log_prov_buy_max_wgt ~ lag(log_prov_buy_max_wgt, 1),
-                data = pdata,
-                model = "pooling")
-
-summary(pool_ar1)
-
-fe_ar1 <- plm(log_prov_buy_max_wgt ~ lag(log_prov_buy_max_wgt, 1),
-                data = pdata,
-                model = "within")
-
-summary(fe_ar1)
-
 #######################################################################
 
 # SYSTEM-GMM
@@ -277,7 +260,6 @@ summary(fe_ar1)
 sys_no_avg <- pgmm(
   log_prov_buy_avg_wgt ~ 
     lag(log_prov_buy_avg_wgt, 1) +
-    #log_prov_ratio_tot_beds +
     log_prov_ratio_tot_nights +
     log_prov_ratio_str_houses +
     log_prov_population +
@@ -285,18 +267,13 @@ sys_no_avg <- pgmm(
     log_prov_immigration +
     log_prov_median_income_wgt +
     log_prov_unemployment |
-    #log_real_gdp +
-    #log_interest_rate |
     lag(log_prov_buy_avg_wgt, 2:10) +
-    #lag(log_prov_ratio_tot_beds, 2:10) +
     lag(log_prov_ratio_tot_nights, 2:10) +
     lag(log_prov_ratio_str_houses, 2:10) +
     lag(log_prov_population, 2:10) +
     lag(log_prov_immigration, 2:10) +
-    lag(log_prov_median_income_wgt, 2:10) +
+    lag(log_prov_median_income_wgt, 1:10) +
     lag(log_prov_unemployment, 2:10),
-    #lag(log_real_gdp, 2:10) +
-    #lag(log_interest_rate, 2:10),
   data = pdata,
   effect = "twoways",
   model = "twostep",
@@ -317,16 +294,12 @@ sys_z_avg <- pgmm(
     log_prov_immigration +
     log_prov_median_income_wgt +
     log_prov_unemployment |
-    #log_real_gdp +
-    #log_interest_rate |
     lag(log_prov_buy_avg_wgt, 2:10) +
     lag(log_tourism_index_z, 2:10) +
     lag(log_prov_population, 2:10) +
     lag(log_prov_immigration, 2:10) +
-    lag(log_prov_median_income_wgt, 2:10) +
+    lag(log_prov_median_income_wgt, 1:10) +
     lag(log_prov_unemployment, 2:10),
-    #lag(log_real_gdp, 2:10) +
-    #lag(log_interest_rate, 2:10),
   data = pdata,
   effect = "twoways",
   model = "twostep",
@@ -359,7 +332,7 @@ sys_no_avg_nat <- pgmm(
     lag(log_prov_ratio_str_houses, 2:10) +
     lag(log_prov_population, 2:10) +
     lag(log_prov_immigration, 2:10) +
-    lag(log_prov_median_income_wgt, 2:10) +
+    lag(log_prov_median_income_wgt, 1:10) +
     lag(log_prov_unemployment, 2:10) +
     lag(log_real_gdp, 1:10) +
     lag(log_interest_rate, 1:10),
@@ -389,7 +362,7 @@ sys_z_avg_nat <- pgmm(
     lag(log_tourism_index_z, 2:10) +
     lag(log_prov_population, 2:10) +
     lag(log_prov_immigration, 2:10) +
-    lag(log_prov_median_income_wgt, 2:10) +
+    lag(log_prov_median_income_wgt, 1:10) +
     lag(log_prov_unemployment, 2:10) +
     lag(log_real_gdp, 1:10) +
     lag(log_interest_rate, 1:10),
@@ -411,7 +384,6 @@ summary(sys_z_avg_nat, robust = TRUE, time.dummies = FALSE)
 sys_no_min <- pgmm(
   log_prov_buy_min_wgt ~ 
     lag(log_prov_buy_min_wgt, 1) +
-    #log_prov_ratio_tot_beds +
     log_prov_ratio_tot_nights +
     log_prov_ratio_str_houses +
     log_prov_population +
@@ -419,18 +391,13 @@ sys_no_min <- pgmm(
     log_prov_immigration +
     log_prov_median_income_wgt +
     log_prov_unemployment |
-    #log_real_gdp +
-    #log_interest_rate |
     lag(log_prov_buy_min_wgt, 2:10) +
-    #lag(log_prov_ratio_tot_beds, 2:10) +
     lag(log_prov_ratio_tot_nights, 2:10) +
     lag(log_prov_ratio_str_houses, 2:10) +
     lag(log_prov_population, 2:10) +
     lag(log_prov_immigration, 2:10) +
-    lag(log_prov_median_income_wgt, 2:10) +
+    lag(log_prov_median_income_wgt, 1:10) +
     lag(log_prov_unemployment, 2:10),
-    #lag(log_real_gdp, 2:10) +
-    #lag(log_interest_rate, 2:10),
   data = pdata,
   effect = "twoways",
   model = "twostep",
@@ -451,16 +418,12 @@ sys_z_min <- pgmm(
     log_prov_immigration +
     log_prov_median_income_wgt +
     log_prov_unemployment |
-    #log_real_gdp +
-    #log_interest_rate |
     lag(log_prov_buy_min_wgt, 2:10) +
     lag(log_tourism_index_z, 2:10) +
     lag(log_prov_population, 2:10) +
     lag(log_prov_immigration, 2:10) +
-    lag(log_prov_median_income_wgt, 2:10) +
+    lag(log_prov_median_income_wgt, 1:10) +
     lag(log_prov_unemployment, 2:10),
-    #lag(log_real_gdp, 2:10) +
-    #lag(log_interest_rate, 2:10),
   data = pdata,
   effect = "twoways",
   model = "twostep",
@@ -479,7 +442,6 @@ summary(sys_z_min, robust = TRUE, time.dummies = FALSE)
 sys_no_max <- pgmm(
   log_prov_buy_max_wgt ~ 
     lag(log_prov_buy_max_wgt, 1) +
-    #log_prov_ratio_tot_beds +
     log_prov_ratio_tot_nights +
     log_prov_ratio_str_houses +
     log_prov_population +
@@ -487,18 +449,13 @@ sys_no_max <- pgmm(
     log_prov_immigration +
     log_prov_median_income_wgt +
     log_prov_unemployment |
-    #log_real_gdp +
-    #log_interest_rate |
     lag(log_prov_buy_max_wgt, 2:10) +
-    #lag(log_prov_ratio_tot_beds, 2:10) +
     lag(log_prov_ratio_tot_nights, 2:10) +
     lag(log_prov_ratio_str_houses, 2:10) +
     lag(log_prov_population, 2:10) +
     lag(log_prov_immigration, 2:10) +
-    lag(log_prov_median_income_wgt, 2:10) +
+    lag(log_prov_median_income_wgt, 1:10) +
     lag(log_prov_unemployment, 2:10),
-    #lag(log_real_gdp, 2:10) +
-    #lag(log_interest_rate, 2:10),
   data = pdata,
   effect = "twoways",
   model = "twostep",
@@ -519,16 +476,12 @@ sys_z_max <- pgmm(
     log_prov_immigration +
     log_prov_median_income_wgt +
     log_prov_unemployment |
-    #log_real_gdp +
-    #log_interest_rate |
     lag(log_prov_buy_max_wgt, 2:10) +
     lag(log_tourism_index_z, 2:10) +
     lag(log_prov_population, 2:10) +
     lag(log_prov_immigration, 2:10) +
-    lag(log_prov_median_income_wgt, 2:10) +
+    lag(log_prov_median_income_wgt, 1:10) +
     lag(log_prov_unemployment, 2:10),
-    #lag(log_real_gdp, 2:10) +
-    #lag(log_interest_rate, 2:10),
   data = pdata,
   effect = "twoways",
   model = "twostep",
@@ -564,12 +517,12 @@ sys_no_avg_cov <- pgmm(
     lag(log_prov_ratio_str_houses, 2:7) +
     lag(log_prov_population, 2:7) +
     lag(log_prov_immigration, 2:7) +
-    lag(log_prov_median_income_wgt, 2:7) +
+    lag(log_prov_median_income_wgt, 1:7) +
     lag(log_prov_unemployment, 2:7) +
     lag(covid_all:log_prov_ratio_tot_nights, 2:7) +
     lag(covid_all:log_prov_ratio_str_houses, 2:7) +
-    lag(log_real_gdp, 2:7) +
-    lag(log_interest_rate, 2:7),
+    lag(log_real_gdp, 1:7) +
+    lag(log_interest_rate, 1:7),
   data = pdata,
   effect = "individual",
   model = "twostep",
@@ -579,6 +532,7 @@ sys_no_avg_cov <- pgmm(
 )
 
 summary(sys_no_avg_cov, robust = TRUE, time.dummies = FALSE)
+
 
 # system-GMM - z - avg - cov
 sys_z_avg_cov <- pgmm(
@@ -598,11 +552,11 @@ sys_z_avg_cov <- pgmm(
     lag(log_tourism_index_z, 2:7) +
     lag(log_prov_population, 2:7) +
     lag(log_prov_immigration, 2:7) +
-    lag(log_prov_median_income_wgt, 2:7) +
+    lag(log_prov_median_income_wgt, 1:7) +
     lag(log_prov_unemployment, 2:7) +
     lag(covid_all:log_tourism_index_z, 2:7) +
-    lag(log_real_gdp, 2:7) +
-    lag(log_interest_rate, 2:7),
+    lag(log_real_gdp, 1:7) +
+    lag(log_interest_rate, 1:7),
   data = pdata,
   effect = "individual",
   model = "twostep",
@@ -636,19 +590,19 @@ sys_no_avg_cov_2 <- pgmm(
     covid_20_21:log_prov_ratio_str_houses +
     covid_2022:log_prov_ratio_tot_nights +
     covid_2022:log_prov_ratio_str_houses |
-    lag(log_prov_buy_avg_wgt, 2:7) +
-    lag(log_prov_ratio_tot_nights, 2:7) +
-    lag(log_prov_ratio_str_houses, 2:7) +
-    lag(log_prov_population, 2:7) +
-    lag(log_prov_immigration, 2:7) +
-    lag(log_prov_median_income_wgt, 2:7) +
-    lag(log_prov_unemployment, 2:7) +
-    lag(log_real_gdp, 2:7) +
-    lag(log_interest_rate, 2:7) +
-    lag(covid_20_21:log_prov_ratio_tot_nights, 2:7) +
-    lag(covid_20_21:log_prov_ratio_str_houses, 2:7) +
-    lag(covid_2022:log_prov_ratio_tot_nights, 2:7) +
-    lag(covid_2022:log_prov_ratio_str_houses, 2:7),
+    lag(log_prov_buy_avg_wgt, 2:6) +
+    lag(log_prov_ratio_tot_nights, 2:6) +
+    lag(log_prov_ratio_str_houses, 2:6) +
+    lag(log_prov_population, 2:6) +
+    lag(log_prov_immigration, 2:6) +
+    lag(log_prov_median_income_wgt, 1:6) +
+    lag(log_prov_unemployment, 2:6) +
+    lag(log_real_gdp, 1:6) +
+    lag(log_interest_rate, 1:6) +
+    lag(covid_20_21:log_prov_ratio_tot_nights, 2:6) +
+    lag(covid_20_21:log_prov_ratio_str_houses, 2:6) +
+    lag(covid_2022:log_prov_ratio_tot_nights, 2:6) +
+    lag(covid_2022:log_prov_ratio_str_houses, 2:6),
   data = pdata,
   effect = "individual",
   model = "twostep",
@@ -675,16 +629,16 @@ sys_z_avg_cov_2 <- pgmm(
     covid_2022 +
     covid_20_21:tourism_index_z +
     covid_2022:tourism_index_z |
-    lag(log_prov_buy_avg_wgt, 2:7) +
-    lag(log_tourism_index_z, 2:7) +
-    lag(log_prov_population, 2:7) +
-    lag(log_prov_immigration, 2:7) +
-    lag(log_prov_median_income_wgt, 2:7) +
-    lag(log_prov_unemployment, 2:7) +
-    lag(log_real_gdp, 2:7) +
-    lag(log_interest_rate, 2:7) +
-    lag(covid_20_21:tourism_index_z, 2:7) +
-    lag(covid_2022:tourism_index_z, 2:7),
+    lag(log_prov_buy_avg_wgt, 2:6) +
+    lag(log_tourism_index_z, 2:6) +
+    lag(log_prov_population, 2:6) +
+    lag(log_prov_immigration, 2:6) +
+    lag(log_prov_median_income_wgt, 1:6) +
+    lag(log_prov_unemployment, 2:6) +
+    lag(log_real_gdp, 1:6) +
+    lag(log_interest_rate, 1:6) +
+    lag(covid_20_21:tourism_index_z, 2:6) +
+    lag(covid_2022:tourism_index_z, 2:6),
   data = pdata,
   effect = "individual",
   model = "twostep",
@@ -715,17 +669,12 @@ W_q <- nb2listw(nb_q, style = "W", zero.policy = TRUE)
 df_2019 <- pdata %>% filter(year == 2019)
 
 # Moran I test - buy
-moran.test(df_2019$log_prov_buy_avg_wgt_de,
+moran.test(df_2019$log_prov_buy_avg_wgt,
            listw = W_q,
            zero.policy = TRUE)
 
 # Moran I test - z
 moran.test(df_2019$log_tourism_index_z,
-           listw = W_q,
-           zero.policy = TRUE)
-
-# Moran I test - rnk
-moran.test(df_2019$log_tourism_index_rnk,
            listw = W_q,
            zero.policy = TRUE)
 
@@ -768,14 +717,6 @@ sar_no <- lagsarlm(
 
 summary(sar_no)
 
-impacts_sar_no <- impacts(
-  sar_model_no,
-  listw = W_q,
-  R = 1000
-)
-
-summary(impacts_sar_no, zstats = TRUE)
-
 # SAR - z
 sar_z <- lagsarlm(
   log_prov_buy_avg_wgt ~
@@ -791,14 +732,6 @@ sar_z <- lagsarlm(
 )
 
 summary(sar_z)
-
-impacts_sar_z <- impacts(
-  sar_z,
-  listw = W_q,
-  R = 1000
-)
-
-summary(impacts_sar_z, zstats = TRUE)
 
 ############################################################
 
@@ -822,23 +755,6 @@ sdm_no <- lagsarlm(
 
 summary(sdm_no)
 
-
-impacts_sdm_no <- impacts(
-  sdm_no,
-  listw = W_q,
-  R = 1000
-)
-
-summary(impacts_sdm_no, zstats = TRUE)
-
-
-R2_LR <- 1 - exp(
-  (2 / nrow(sp_2019)) *
-  (logLik(sdm_null) - logLik(sdm_no))
-)
-R2_LR
-
-
 # SDM - z
 sdm_z <- lagsarlm(
   log_prov_buy_avg_wgt ~
@@ -856,22 +772,22 @@ sdm_z <- lagsarlm(
 
 summary(sdm_z)
 
-
-impacts_sdm_z <- impacts(
-  sdm_z,
-  listw = W_q,
-  R = 1000
-)
-
-summary(impacts_sdm_z, zstats = TRUE)
-
-R2_LR <- 1 - exp(
-  (2 / nrow(sp_2019)) *
-  (logLik(sdm_null) - logLik(sdm_z))
-)
-R2_LR
-
 #############################################################
+
+fe_ols <- plm(
+  log_prov_buy_avg_wgt ~
+    log_prov_ratio_tot_nights +
+    log_prov_ratio_str_houses +
+    log_prov_population +
+    log_reg_age_avg +
+    log_prov_median_income_wgt +
+    log_prov_unemployment +
+    log_real_gdp +
+    log_interest_rate,
+  data = pdata,
+  model = "within",
+  effect = "individual"
+)
 
 # SPATIAL AUTOREGRESSIVE MODEL- FIXED EFFECTS
 
@@ -890,16 +806,29 @@ sar_no_fe <- spml(
   listw = W_q,
   model = "within",
   lag = TRUE,
-  effect = "individual"
+  effect = "individual",
+  spatial.error = "none"
 )
 
 summary(sar_no_fe)
 
-y <- sar_no_fe$model[, 1]
+index <- index(pdata)       # returns a dataframe with columns: prov, year
+id <- index[,1]             # first column = "prov"
+
+y <- sar_no_fe$model[,1]
 y_hat <- sar_no_fe$fitted.values
 
-R2_within <- cor(y, y_hat)^2
+# get the individual IDs from pdata
+id <- index(pdata)[,1]
+
+# compute within-transformed variables
+y_within <- y - ave(y, id, FUN = mean)
+yhat_within <- y_hat - ave(y_hat, id, FUN = mean)
+
+# pseudo R² for within
+R2_within <- cor(y_within, yhat_within)^2
 R2_within
+
 
 # SAR - z - fe
 sar_z_fe <- spml(
@@ -915,17 +844,24 @@ sar_z_fe <- spml(
   listw = W_q,
   model = "within",
   lag = TRUE,
-  effect = "individual"
+  effect = "individual",
+  spatial.error = "none"
 )
 
 summary(sar_z_fe)
 
 
-y <- sar_z_fe$model[, 1]
+y <- sar_z_fe$model[,1]
 y_hat <- sar_z_fe$fitted.values
 
-R2_within <- cor(y, y_hat)^2
+# get the individual IDs from pdata
+id <- index(pdata)[,1]
+
+# compute within-transformed variables
+y_within <- y - ave(y, id, FUN = mean)
+yhat_within <- y_hat - ave(y_hat, id, FUN = mean)
+
+# pseudo R² for within
+R2_within <- cor(y_within, yhat_within)^2
 R2_within
-
-
 
